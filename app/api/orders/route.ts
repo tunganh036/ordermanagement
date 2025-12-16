@@ -110,7 +110,7 @@ async function sendSlackNotification(orderData: any) {
           },
           {
             type: "mrkdwn",
-            text: `*Total:*\n${orderData.subtotal.toLocaleString()} VND`,
+            text: `*Total:*\n${orderData.subtotal} VND`,
           },
         ],
       },
@@ -118,7 +118,7 @@ async function sendSlackNotification(orderData: any) {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `*Items:*\n${orderData.items.map((item: any) => `• ${item.productName} (x${item.quantity}) - ${item.total.toLocaleString()} VND`).join("\n")}`,
+          text: `*Items:*\n${orderData.items.map((item: any) => `• ${item.productName} (x${item.quantity}) - ${item.total} VND`).join("\n")}`,
         },
       },
     ],
