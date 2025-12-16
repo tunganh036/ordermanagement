@@ -149,6 +149,7 @@ export default function OrderEntryPage() {
       }
 
       setShowConfirmation(false)
+      console.log("APICALL OK, showing success")
       setShowSuccessModal(true)
     } catch (error) {
       console.error("[v0] Error submitting order:", error)
