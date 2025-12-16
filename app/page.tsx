@@ -549,7 +549,7 @@ function ReviewOrderPage({
   }
 
   const handleSubmit = () => {
-    handleSubmitOrder()
+    onSubmitSuccess()
   }
 
   return (
