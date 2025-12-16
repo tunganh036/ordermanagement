@@ -117,9 +117,16 @@ export default function OrderEntryPage() {
         billingName: billingToName,
         billingAddress: billingToAddress,
         billingTaxNumber: billingToTaxReg,
-        items: orderItems,
+        items: orderItems.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
         subtotal: calculateTotal(),
       }
+
+      console.log("[v0] Submitting order:", orderData)
 
       const response = await fetch("/api/orders", {
         method: "POST",
@@ -129,9 +136,14 @@ export default function OrderEntryPage() {
         body: JSON.stringify(orderData),
       })
 
-      if (!response.ok) throw new Error("Failed to submit order")
-
       const result = await response.json()
+
+      if (!response.ok) {
+        console.error("[v0] Order submission failed:", result)
+        throw new Error(result.details || result.error || "Failed to submit order")
+      }
+
+      console.log("[v0] Order submitted successfully:", result)
 
       alert("Đơn hàng đã được gửi thành công!")
 
@@ -146,9 +158,9 @@ export default function OrderEntryPage() {
       setBillingToAddress("")
       setBillingToTaxReg("")
       setShowReviewPage(false)
-    } catch (error) {
-      console.error("Error submitting order:", error)
-      alert("Có lỗi xảy ra khi gửi đơn hàng. Vui lòng thử lại.")
+    } catch (error: any) {
+      console.error("[v0] Error submitting order:", error)
+      alert(`Có lỗi xảy ra khi gửi đơn hàng: ${error.message}. Vui lòng thử lại.`)
     }
   }
 

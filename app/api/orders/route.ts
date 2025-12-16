@@ -5,6 +5,8 @@ export async function POST(request: Request) {
   try {
     const orderData = await request.json()
 
+    console.log("[v0] Received order data:", JSON.stringify(orderData, null, 2))
+
     const supabase = await createClient()
 
     // Insert order header
@@ -26,21 +28,33 @@ export async function POST(request: Request) {
       .select()
       .single()
 
-    if (orderError) throw orderError
+    if (orderError) {
+      console.error("[v0] Order insertion error:", orderError)
+      throw orderError
+    }
+
+    console.log("[v0] Order created successfully:", order)
 
     // Insert order items
-    const { error: itemsError } = await supabase.from("order_items").insert(
-      orderData.items.map((item: any) => ({
-        order_id: order.id,
-        product_id: item.id,
-        product_name: item.name,
-        quantity: item.quantity,
-        unit_price: item.price,
-        total: item.price * item.quantity,
-      })),
-    )
+    const itemsToInsert = orderData.items.map((item: any) => ({
+      order_id: order.id,
+      product_id: item.id,
+      product_name: item.name,
+      quantity: item.quantity,
+      unit_price: item.price,
+      total: item.price * item.quantity,
+    }))
 
-    if (itemsError) throw itemsError
+    console.log("[v0] Inserting order items:", itemsToInsert)
+
+    const { error: itemsError } = await supabase.from("order_items").insert(itemsToInsert)
+
+    if (itemsError) {
+      console.error("[v0] Order items insertion error:", itemsError)
+      throw itemsError
+    }
+
+    console.log("[v0] Order items inserted successfully")
 
     await sendSlackNotification(orderData)
 
@@ -48,9 +62,16 @@ export async function POST(request: Request) {
       success: true,
       orderId: order.id,
     })
-  } catch (error) {
-    console.error("Order creation failed:", error)
-    return NextResponse.json({ error: "Failed to create order" }, { status: 500 })
+  } catch (error: any) {
+    console.error("[v0] Order creation failed:", error)
+    return NextResponse.json(
+      {
+        error: "Failed to create order",
+        details: error.message || "Unknown error",
+        code: error.code || null,
+      },
+      { status: 500 },
+    )
   }
 }
 
