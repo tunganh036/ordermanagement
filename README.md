@@ -33,18 +33,18 @@ A modern, responsive order entry system built with Next.js 16 for managing custo
 
 1. Clone the repository
 2. Install dependencies:
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 3. Configure environment variables:
    - Copy `.env.local` and fill in your values
    - See "Environment Variables" section below for details
 
 4. Run the development server:
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
@@ -52,7 +52,7 @@ npm run dev
 
 Create a `.env.local` file in the root directory with the following variables:
 
-\`\`\`env
+```env
 # Database Connection
 DATABASE_URL=your_database_connection_string
 
@@ -62,7 +62,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # Slack Webhook for Order Notifications
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
-\`\`\`
+```
 
 ### Setting up Slack Webhook
 
@@ -82,7 +82,7 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 Create these tables in your database (Supabase, Neon, or other PostgreSQL database):
 
 **Products Table**:
-\`\`\`sql
+```sql
 CREATE TABLE products (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
@@ -91,10 +91,10 @@ CREATE TABLE products (
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-\`\`\`
+```
 
 **Orders Table**:
-\`\`\`sql
+```sql
 CREATE TABLE orders (
   id SERIAL PRIMARY KEY,
   order_number VARCHAR(50) UNIQUE NOT NULL,
@@ -110,10 +110,10 @@ CREATE TABLE orders (
   subtotal DECIMAL(15, 2) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-\`\`\`
+```
 
 **Order Items Table**:
-\`\`\`sql
+```sql
 CREATE TABLE order_items (
   id SERIAL PRIMARY KEY,
   order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
@@ -124,13 +124,13 @@ CREATE TABLE order_items (
   total DECIMAL(15, 2) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-\`\`\`
+```
 
 ### Step 2: Configure Environment Variables
 
 Add your database credentials to `.env.local`:
 
-\`\`\`env
+```env
 # For Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
@@ -140,7 +140,7 @@ DATABASE_URL=postgresql://user:password@host:port/database
 
 # Slack notifications
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
-\`\`\`
+```
 
 ### Step 3: Uncomment API Route Code
 
@@ -172,7 +172,7 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 
 Replace the static `useState` with API fetching:
 
-\`\`\`tsx
+```tsx
 // Replace this:
 const [products] = useState<Product[]>([...])
 
@@ -194,13 +194,13 @@ useEffect(() => {
   }
   fetchProducts()
 }, [])
-\`\`\`
+```
 
 **Order Submission - Around line 435-445 (confirmOrder function)**:
 
 Replace the simple alert with API call:
 
-\`\`\`tsx
+```tsx
 // Replace this:
 const confirmOrder = () => {
   alert("Order submitted successfully!")
@@ -249,7 +249,7 @@ const confirmOrder = async () => {
     alert('Failed to submit order. Please try again.')
   }
 }
-\`\`\`
+```
 
 ## Deployment Options
 
@@ -272,7 +272,7 @@ Deploy to your own server infrastructure with a local PostgreSQL database.
 
 #### Install Node.js and PostgreSQL
 
-\`\`\`bash
+```bash
 # Update system
 sudo apt update && sudo apt upgrade -y
 
@@ -286,13 +286,13 @@ sudo apt install postgresql postgresql-contrib -y
 # Start PostgreSQL
 sudo systemctl start postgresql
 sudo systemctl enable postgresql
-\`\`\`
+```
 
 ### Step 2: Database Setup
 
 #### Create Database and User
 
-\`\`\`bash
+```bash
 # Login to PostgreSQL
 sudo -u postgres psql
 
@@ -303,19 +303,19 @@ GRANT ALL PRIVILEGES ON DATABASE order_entry_db TO order_app_user;
 
 # Exit PostgreSQL
 \q
-\`\`\`
+```
 
 #### Create Tables
 
 Connect to your database and run the SQL scripts:
 
-\`\`\`bash
+```bash
 psql -U order_app_user -d order_entry_db -h localhost
-\`\`\`
+```
 
 Then execute:
 
-\`\`\`sql
+```sql
 -- Products Table
 CREATE TABLE products (
   id SERIAL PRIMARY KEY,
@@ -360,13 +360,13 @@ INSERT INTO products (name, description, price) VALUES
 ('Laptop Dell XPS 13', 'High-performance ultrabook with 11th Gen Intel Core i7', 25000000.00),
 ('iPhone 14 Pro', 'Latest iPhone with A16 Bionic chip and 48MP camera', 28000000.00),
 ('Samsung Galaxy S23', 'Flagship Android phone with Snapdragon 8 Gen 2', 22000000.00);
-\`\`\`
+```
 
 ### Step 3: Application Setup
 
 #### Clone and Configure
 
-\`\`\`bash
+```bash
 # Navigate to your web directory
 cd /var/www
 
@@ -379,19 +379,19 @@ npm install
 
 # Build the application
 npm run build
-\`\`\`
+```
 
 #### Configure Environment Variables
 
 Create `.env.local` file:
 
-\`\`\`bash
+```bash
 nano .env.local
-\`\`\`
+```
 
 Add the following:
 
-\`\`\`env
+```env
 # Database Connection (PostgreSQL)
 DATABASE_URL=postgresql://order_app_user:your_secure_password@localhost:5432/order_entry_db
 
@@ -400,7 +400,7 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 
 # Optional: Custom Port
 PORT=3000
-\`\`\`
+```
 
 ### Step 4: Update API Routes for PostgreSQL
 
@@ -408,7 +408,7 @@ PORT=3000
 
 Replace the commented Supabase code with raw PostgreSQL queries:
 
-\`\`\`typescript
+```typescript
 import { Client } from 'pg'
 
 export async function GET() {
@@ -429,11 +429,11 @@ export async function GET() {
     await client.end()
   }
 }
-\`\`\`
+```
 
 #### Modify `app/api/orders/route.ts`
 
-\`\`\`typescript
+```typescript
 import { Client } from 'pg'
 
 export async function POST(request: Request) {
@@ -488,11 +488,11 @@ export async function POST(request: Request) {
     await client.end()
   }
 }
-\`\`\`
+```
 
 ### Step 5: Process Management with PM2
 
-\`\`\`bash
+```bash
 # Install PM2 globally
 sudo npm install -g pm2
 
@@ -505,19 +505,19 @@ pm2 save
 # Setup PM2 to start on boot
 pm2 startup
 # Follow the instructions provided by the command above
-\`\`\`
+```
 
 ### Step 6: Configure Nginx (Optional)
 
 Create Nginx configuration:
 
-\`\`\`bash
+```bash
 sudo nano /etc/nginx/sites-available/order-entry
-\`\`\`
+```
 
 Add configuration:
 
-\`\`\`nginx
+```nginx
 server {
     listen 80;
     server_name your-domain.com;
@@ -531,25 +531,25 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 }
-\`\`\`
+```
 
 Enable and restart Nginx:
 
-\`\`\`bash
+```bash
 sudo ln -s /etc/nginx/sites-available/order-entry /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
-\`\`\`
+```
 
 ### Step 7: Firewall Configuration
 
-\`\`\`bash
+```bash
 # Allow SSH, HTTP, and HTTPS
 sudo ufw allow 22
 sudo ufw allow 80
 sudo ufw allow 443
 sudo ufw enable
-\`\`\`
+```
 
 ### On-Premise Deployment Checklist
 
@@ -596,7 +596,7 @@ Deploy to Vercel's serverless platform with Supabase as your managed PostgreSQL 
 2. Click "New query"
 3. Paste and run:
 
-\`\`\`sql
+```sql
 -- Products Table
 CREATE TABLE products (
   id SERIAL PRIMARY KEY,
@@ -643,7 +643,7 @@ INSERT INTO products (name, description, price) VALUES
 ('Samsung Galaxy S23', 'Flagship Android phone with Snapdragon 8 Gen 2', 22000000.00),
 ('MacBook Pro M2', '14-inch with M2 Pro chip and Liquid Retina XDR display', 52000000.00),
 ('Sony WH-1000XM5', 'Industry-leading noise canceling wireless headphones', 8500000.00);
-\`\`\`
+```
 
 4. Click "Run" to execute
 
@@ -656,7 +656,7 @@ INSERT INTO products (name, description, price) VALUES
 
 ### Step 2: Push to GitHub
 
-\`\`\`bash
+```bash
 # Initialize git (if not already)
 git init
 
@@ -670,7 +670,7 @@ git commit -m "Initial commit: Order Entry Interface"
 git remote add origin https://github.com/your-username/order-entry-app.git
 git branch -M main
 git push -u origin main
-\`\`\`
+```
 
 ### Step 3: Deploy to Vercel
 
@@ -689,11 +689,11 @@ git push -u origin main
 
 In the Vercel project settings, add these environment variables:
 
-\`\`\`
+```
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
-\`\`\`
+```
 
 Click "Deploy"
 
@@ -707,14 +707,14 @@ Your API routes already have Supabase code commented out. Simply uncomment them:
 
 The code should use the `@supabase/supabase-js` client:
 
-\`\`\`typescript
+```typescript
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
-\`\`\`
+```
 
 #### File: `app/api/orders/route.ts`
 
@@ -728,7 +728,7 @@ const supabase = createClient(
 
 Replace the static `useState` with API fetching:
 
-\`\`\`tsx
+```tsx
 const [products, setProducts] = useState<Product[]>([])
 const [loadingProducts, setLoadingProducts] = useState(true)
 
@@ -746,13 +746,13 @@ useEffect(() => {
   }
   fetchProducts()
 }, [])
-\`\`\`
+```
 
 **Order Submission - Around line 435-445 (confirmOrder function)**:
 
 Replace the simple alert with API call:
 
-\`\`\`tsx
+```tsx
 const confirmOrder = async () => {
   try {
     const orderData = {
@@ -792,17 +792,17 @@ const confirmOrder = async () => {
     alert('Failed to submit order. Please try again.')
   }
 }
-\`\`\`
+```
 
 ### Step 6: Redeploy (Vercel)
 
 After updating the code:
 
-\`\`\`bash
+```bash
 git add .
 git commit -m "Enable API integration with Supabase"
 git push origin main
-\`\`\`
+```
 
 Vercel will automatically redeploy your application.
 
@@ -886,13 +886,13 @@ Vercel will automatically redeploy your application.
 
 ### On-Premise
 
-\`\`\`bash
+```bash
 # View PM2 logs
 pm2 logs order-entry-app
 
 # View PostgreSQL logs
 sudo tail -f /var/log/postgresql/postgresql-14-main.log
-\`\`\`
+```
 
 ### Cloud (Vercel)
 
@@ -907,13 +907,13 @@ sudo tail -f /var/log/postgresql/postgresql-14-main.log
 
 ### On-Premise
 
-\`\`\`bash
+```bash
 # Automated daily backup script
 pg_dump -U order_app_user order_entry_db > backup_$(date +%Y%m%d).sql
 
 # Add to crontab for daily backups
 0 2 * * * /path/to/backup_script.sh
-\`\`\`
+```
 
 ### Cloud (Supabase)
 

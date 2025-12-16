@@ -1,25 +1,15 @@
 import { NextResponse } from "next/server"
+import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: Request) {
   try {
     const orderData = await request.json()
 
-    // 1. Save to database
-    // Example with Supabase:
-    // const { createServerClient } = require('@supabase/ssr')
-    // const supabase = createServerClient(
-    //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    //   {
-    //     cookies: {
-    //       get: (name: string) => request.cookies.get(name)?.value,
-    //     },
-    //   }
-    // )
-    
+    const supabase = await createClient()
+
     // Insert order header
     const { data: order, error: orderError } = await supabase
-      .from('orders')
+      .from("orders")
       .insert({
         order_number: orderData.orderNumber,
         order_date: orderData.orderDate,
@@ -31,35 +21,32 @@ export async function POST(request: Request) {
         billing_name: orderData.billingName,
         billing_address: orderData.billingAddress,
         billing_tax_number: orderData.billingTaxNumber,
-        subtotal: orderData.subtotal
+        subtotal: orderData.subtotal,
       })
       .select()
       .single()
-    
+
     if (orderError) throw orderError
-    
+
     // Insert order items
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .insert(
-        orderData.items.map((item: any) => ({
-          order_id: order.id,
-          product_id: item.productId,
-          product_name: item.productName,
-          quantity: item.quantity,
-          unit_price: item.unitPrice,
-          total: item.total
-        }))
-      )
-    
+    const { error: itemsError } = await supabase.from("order_items").insert(
+      orderData.items.map((item: any) => ({
+        order_id: order.id,
+        product_id: item.id,
+        product_name: item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+        total: item.price * item.quantity,
+      })),
+    )
+
     if (itemsError) throw itemsError
 
-    // 2. Send Slack notification
     await sendSlackNotification(orderData)
 
     return NextResponse.json({
       success: true,
-      orderId: orderData.orderNumber, // Use actual order.id from database when connected
+      orderId: order.id,
     })
   } catch (error) {
     console.error("Order creation failed:", error)

@@ -1,47 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Search, Plus, Minus, ShoppingCart } from "lucide-react"
-
-// Sample product data
-// const PRODUCTS = [
-  // {
-    // id: 1,
-    // name: "Wireless Mouse",
-    // description: "Ergonomic wireless mouse with precision tracking",
-    // price: 122222222.99,
-  // },
-  // { id: 2, name: "Mechanical Keyboard", description: "RGB backlit mechanical gaming keyboard", price: 89.99 },
-  // { id: 3, name: "USB-C Hub", description: "7-in-1 USB-C hub with HDMI and USB ports", price: 49.99 },
-  // { id: 4, name: "Laptop Stand", description: "Adjustable aluminum laptop stand", price: 39.99 },
-  // { id: 5, name: "Desk Lamp", description: "LED desk lamp with adjustable brightness", price: 34.99 },
-  // { id: 6, name: "Monitor Mount", description: "Dual monitor arm mount for desks", price: 79.99 },
-  // { id: 7, name: "Webcam HD", description: "1080p HD webcam with built-in microphone", price: 69.99 },
-  // { id: 8, name: "Headphones", description: "Noise-cancelling over-ear headphones", price: 149.99 },
-  // { id: 9, name: "Phone Charger", description: "Fast charging USB-C phone charger", price: 19.99 },
-  // { id: 10, name: "Cable Organizer", description: "Desk cable management organizer", price: 12.99 },
-// ]
-
-const [products, setProducts] = useState<Product[]>([])
-const [loadingProducts, setLoadingProducts] = useState(true)
-
-useEffect(() => {
-  async function fetchProducts() {
-    try {
-      const response = await fetch('/api/products')
-      const data = await response.json()
-      setProducts(data)
-    } catch (error) {
-      console.error('Failed to fetch products:', error)
-    } finally {
-      setLoadingProducts(false)
-    }
-  }
-  fetchProducts()
-}, [])
+import { Card } from "@/components/ui/card"
+import { Search, Plus, Minus, Trash2 } from "lucide-react"
 
 type OrderItem = {
   id: number
@@ -51,17 +14,12 @@ type OrderItem = {
   quantity: number
 }
 
-type OrderHeader = {
-  orderNumber: string
-  orderDate: string
-  customerName: string
-  customerAddress: string
-  customerPhone: string
-  customerEmail: string
-  shipToAddress: string
-  billingToName: string
-  billingToAddress: string
-  billingToTaxReg: string
+type Product = {
+  id: number
+  name: string
+  description: string
+  price: number
+  is_active?: boolean
 }
 
 export default function OrderEntryPage() {
@@ -78,12 +36,30 @@ export default function OrderEntryPage() {
   const [billingToName, setBillingToName] = useState("")
   const [billingToAddress, setBillingToAddress] = useState("")
   const [billingToTaxReg, setBillingToTaxReg] = useState("")
+  const [products, setProducts] = useState<Product[]>([])
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true)
 
-  // Filter products based on search
-  const filteredProducts = PRODUCTS.filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("/api/products")
+        if (!response.ok) throw new Error("Failed to fetch products")
+        const data = await response.json()
+        setProducts(data)
+      } catch (error) {
+        console.error("Error fetching products:", error)
+      } finally {
+        setIsLoadingProducts(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
+
+  const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
   // Add product to order
-  const addProduct = (product: (typeof PRODUCTS)[0]) => {
+  const addProduct = (product: Product) => {
     const existingItem = orderItems.find((item) => item.id === product.id)
 
     if (existingItem) {
@@ -111,7 +87,10 @@ export default function OrderEntryPage() {
   }
 
   // Calculate totals
-  const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const calculateTotal = () => {
+    return orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  }
+
   const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0)
 
   const formatVND = (amount: number) => {
@@ -123,6 +102,54 @@ export default function OrderEntryPage() {
 
   const handleReviewOrder = () => {
     setShowReviewPage(true)
+  }
+
+  const handleSubmitOrder = async () => {
+    try {
+      const orderData = {
+        orderNumber,
+        orderDate,
+        customerName,
+        customerAddress,
+        customerPhone,
+        customerEmail,
+        shipToAddress,
+        billingName: billingToName,
+        billingAddress: billingToAddress,
+        billingTaxNumber: billingToTaxReg,
+        items: orderItems,
+        subtotal: calculateTotal(),
+      }
+
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      })
+
+      if (!response.ok) throw new Error("Failed to submit order")
+
+      const result = await response.json()
+
+      alert("Đơn hàng đã được gửi thành công!")
+
+      // Reset form
+      setOrderItems([])
+      setCustomerName("")
+      setCustomerAddress("")
+      setCustomerPhone("")
+      setCustomerEmail("")
+      setShipToAddress("")
+      setBillingToName("")
+      setBillingToAddress("")
+      setBillingToTaxReg("")
+      setShowReviewPage(false)
+    } catch (error) {
+      console.error("Error submitting order:", error)
+      alert("Có lỗi xảy ra khi gửi đơn hàng. Vui lòng thử lại.")
+    }
   }
 
   if (showReviewPage) {
@@ -142,10 +169,7 @@ export default function OrderEntryPage() {
         }}
         orderItems={orderItems}
         onBack={() => setShowReviewPage(false)}
-        onSubmitSuccess={() => {
-          setOrderItems([])
-          setShowReviewPage(false)
-        }}
+        onSubmitSuccess={handleSubmitOrder}
       />
     )
   }
@@ -291,39 +315,37 @@ export default function OrderEntryPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  type="text"
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-9"
+                  className="pl-9 h-9 text-sm"
                 />
               </div>
             </div>
-
-            <div className="space-y-1 max-h-[400px] overflow-y-auto">
-              <div className="grid grid-cols-[1fr,auto,auto] gap-3 pb-2 border-b border-border text-xs font-semibold text-muted-foreground">
-                <div>Product Name</div>
-                <div className="text-right">Unit Price</div>
-                <div className="w-16"></div>
-              </div>
-
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="grid grid-cols-[1fr,auto,auto] gap-3 py-2 border-b border-border/50 items-center hover:bg-muted/50 transition-colors"
-                >
-                  <div>
-                    <div className="text-foreground text-sm font-medium">{product.name}</div>
-                    <div className="text-muted-foreground text-xs mt-0.5">{product.description}</div>
+            {isLoadingProducts ? (
+              <div className="text-center py-8 text-sm text-muted-foreground">Loading products...</div>
+            ) : (
+              <div className="space-y-1">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="flex items-start justify-between p-2 hover:bg-accent rounded-md cursor-pointer transition-colors"
+                    onClick={() => addProduct(product)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm">{product.name}</div>
+                      <div className="text-xs text-muted-foreground">{product.description}</div>
+                    </div>
+                    <div className="text-sm font-semibold text-right ml-2 shrink-0">
+                      {product.price.toLocaleString()} VND
+                    </div>
                   </div>
-                  <div className="text-right text-foreground text-sm font-medium">{formatVND(product.price)} VND</div>
-                  <Button size="sm" variant="outline" onClick={() => addProduct(product)} className="w-16 h-8 text-xs">
-                    <Plus className="h-3 w-3 mr-1" />
-                    Add
-                  </Button>
-                </div>
-              ))}
-            </div>
+                ))}
+                {filteredProducts.length === 0 && (
+                  <div className="text-center py-8 text-sm text-muted-foreground">No products found</div>
+                )}
+              </div>
+            )}
           </Card>
 
           {/* Right Panel - Order Detail */}
@@ -332,7 +354,7 @@ export default function OrderEntryPage() {
 
             {orderItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
-                <ShoppingCart className="h-12 w-12 mb-3 opacity-50" />
+                <Trash2 className="h-12 w-12 mb-3 opacity-50" />
                 <p className="text-base">No items in order</p>
                 <p className="text-sm">Add products from the left panel</p>
               </div>
@@ -405,7 +427,7 @@ export default function OrderEntryPage() {
                   </div>
                   <div className="flex justify-between text-base font-semibold text-foreground">
                     <span>Subtotal:</span>
-                    <span>{formatVND(subtotal)} VND</span>
+                    <span>{formatVND(calculateTotal())} VND</span>
                   </div>
                 </div>
               </>
@@ -432,14 +454,17 @@ function ReviewOrderPage({
   onBack,
   onSubmitSuccess,
 }: {
-  orderHeader: OrderHeader
-  orderItems: OrderItem[]
+  orderHeader: any
+  orderItems: any[]
   onBack: () => void
   onSubmitSuccess: () => void
 }) {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
 
-  const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const calculateTotal = () => {
+    return orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  }
+
   const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0)
 
   const formatVND = (amount: number) => {
@@ -453,51 +478,11 @@ function ReviewOrderPage({
     setShowConfirmModal(true)
   }
 
-  // const confirmOrder = () => {
-    // alert("Order submitted successfully!")
-    // setShowConfirmModal(false)
-    // onSubmitSuccess()
-  // }
-  const confirmOrder = async () => {
-  try {
-    const orderData = {
-      orderNumber: orderHeader.orderNumber,
-      orderDate: orderHeader.orderDate,
-      customerName: orderHeader.customerName,
-      customerAddress: orderHeader.customerAddress,
-      customerPhone: orderHeader.customerPhone,
-      customerEmail: orderHeader.customerEmail,
-      shipToAddress: orderHeader.shipToAddress,
-      billingName: orderHeader.billingName,
-      billingAddress: orderHeader.billingAddress,
-      billingTaxNumber: orderHeader.billingTaxNumber,
-      items: orderItems.map(item => ({
-        productId: item.id,
-        productName: item.name,
-        quantity: item.quantity,
-        unitPrice: item.price,
-        total: item.price * item.quantity
-      })),
-      subtotal: orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    }
-
-    const response = await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    })
-
-    if (!response.ok) throw new Error('Failed to submit order')
-
-    const result = await response.json()
-    alert('Order submitted successfully!')
+  const confirmOrder = () => {
+    alert("Order submitted successfully!")
     setShowConfirmModal(false)
     onSubmitSuccess()
-  } catch (error) {
-    console.error('Order submission failed:', error)
-    alert('Failed to submit order. Please try again.')
   }
-}
 
   return (
     <div className="min-h-screen bg-background">
@@ -614,7 +599,9 @@ function ReviewOrderPage({
                     Total Items:
                   </td>
                   <td className="text-center font-semibold text-foreground px-4 py-3">{totalItems}</td>
-                  <td className="text-right text-xl font-bold text-foreground px-4 py-3">{formatVND(subtotal)} VND</td>
+                  <td className="text-right text-xl font-bold text-foreground px-4 py-3">
+                    {formatVND(calculateTotal())} VND
+                  </td>
                 </tr>
               </tfoot>
             </table>
