@@ -7,23 +7,41 @@ import { Input } from "@/components/ui/input"
 import { Search, Plus, Minus, ShoppingCart } from "lucide-react"
 
 // Sample product data
-const PRODUCTS = [
-  {
-    id: 1,
-    name: "Wireless Mouse",
-    description: "Ergonomic wireless mouse with precision tracking",
-    price: 122222222.99,
-  },
-  { id: 2, name: "Mechanical Keyboard", description: "RGB backlit mechanical gaming keyboard", price: 89.99 },
-  { id: 3, name: "USB-C Hub", description: "7-in-1 USB-C hub with HDMI and USB ports", price: 49.99 },
-  { id: 4, name: "Laptop Stand", description: "Adjustable aluminum laptop stand", price: 39.99 },
-  { id: 5, name: "Desk Lamp", description: "LED desk lamp with adjustable brightness", price: 34.99 },
-  { id: 6, name: "Monitor Mount", description: "Dual monitor arm mount for desks", price: 79.99 },
-  { id: 7, name: "Webcam HD", description: "1080p HD webcam with built-in microphone", price: 69.99 },
-  { id: 8, name: "Headphones", description: "Noise-cancelling over-ear headphones", price: 149.99 },
-  { id: 9, name: "Phone Charger", description: "Fast charging USB-C phone charger", price: 19.99 },
-  { id: 10, name: "Cable Organizer", description: "Desk cable management organizer", price: 12.99 },
-]
+// const PRODUCTS = [
+  // {
+    // id: 1,
+    // name: "Wireless Mouse",
+    // description: "Ergonomic wireless mouse with precision tracking",
+    // price: 122222222.99,
+  // },
+  // { id: 2, name: "Mechanical Keyboard", description: "RGB backlit mechanical gaming keyboard", price: 89.99 },
+  // { id: 3, name: "USB-C Hub", description: "7-in-1 USB-C hub with HDMI and USB ports", price: 49.99 },
+  // { id: 4, name: "Laptop Stand", description: "Adjustable aluminum laptop stand", price: 39.99 },
+  // { id: 5, name: "Desk Lamp", description: "LED desk lamp with adjustable brightness", price: 34.99 },
+  // { id: 6, name: "Monitor Mount", description: "Dual monitor arm mount for desks", price: 79.99 },
+  // { id: 7, name: "Webcam HD", description: "1080p HD webcam with built-in microphone", price: 69.99 },
+  // { id: 8, name: "Headphones", description: "Noise-cancelling over-ear headphones", price: 149.99 },
+  // { id: 9, name: "Phone Charger", description: "Fast charging USB-C phone charger", price: 19.99 },
+  // { id: 10, name: "Cable Organizer", description: "Desk cable management organizer", price: 12.99 },
+// ]
+
+const [products, setProducts] = useState<Product[]>([])
+const [loadingProducts, setLoadingProducts] = useState(true)
+
+useEffect(() => {
+  async function fetchProducts() {
+    try {
+      const response = await fetch('/api/products')
+      const data = await response.json()
+      setProducts(data)
+    } catch (error) {
+      console.error('Failed to fetch products:', error)
+    } finally {
+      setLoadingProducts(false)
+    }
+  }
+  fetchProducts()
+}, [])
 
 type OrderItem = {
   id: number
@@ -435,11 +453,51 @@ function ReviewOrderPage({
     setShowConfirmModal(true)
   }
 
-  const confirmOrder = () => {
-    alert("Order submitted successfully!")
+  // const confirmOrder = () => {
+    // alert("Order submitted successfully!")
+    // setShowConfirmModal(false)
+    // onSubmitSuccess()
+  // }
+  const confirmOrder = async () => {
+  try {
+    const orderData = {
+      orderNumber: orderHeader.orderNumber,
+      orderDate: orderHeader.orderDate,
+      customerName: orderHeader.customerName,
+      customerAddress: orderHeader.customerAddress,
+      customerPhone: orderHeader.customerPhone,
+      customerEmail: orderHeader.customerEmail,
+      shipToAddress: orderHeader.shipToAddress,
+      billingName: orderHeader.billingName,
+      billingAddress: orderHeader.billingAddress,
+      billingTaxNumber: orderHeader.billingTaxNumber,
+      items: orderItems.map(item => ({
+        productId: item.id,
+        productName: item.name,
+        quantity: item.quantity,
+        unitPrice: item.price,
+        total: item.price * item.quantity
+      })),
+      subtotal: orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    }
+
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    })
+
+    if (!response.ok) throw new Error('Failed to submit order')
+
+    const result = await response.json()
+    alert('Order submitted successfully!')
     setShowConfirmModal(false)
     onSubmitSuccess()
+  } catch (error) {
+    console.error('Order submission failed:', error)
+    alert('Failed to submit order. Please try again.')
   }
+}
 
   return (
     <div className="min-h-screen bg-background">
