@@ -23,11 +23,8 @@ type Product = {
 }
 
 export default function OrderEntryPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [orderItems, setOrderItems] = useState<OrderItem[]>([])
-  const [showReviewPage, setShowReviewPage] = useState(false)
-  const [orderDate] = useState(new Date().toLocaleDateString())
-  const [orderNumber] = useState(`ORD-${Date.now().toString().slice(-6)}`)
+  const [orderNumber] = useState(`ORD-${Date.now()}`)
+  const [orderDate] = useState(new Date().toISOString().split("T")[0])
   const [customerName, setCustomerName] = useState("")
   const [customerAddress, setCustomerAddress] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
@@ -36,6 +33,13 @@ export default function OrderEntryPage() {
   const [billingToName, setBillingToName] = useState("")
   const [billingToAddress, setBillingToAddress] = useState("")
   const [billingToTaxReg, setBillingToTaxReg] = useState("")
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showReview, setShowReview] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
   const [products, setProducts] = useState<Product[]>([])
   const [isLoadingProducts, setIsLoadingProducts] = useState(true)
 
@@ -101,7 +105,7 @@ export default function OrderEntryPage() {
   }
 
   const handleReviewOrder = () => {
-    setShowReviewPage(true)
+    setShowReview(true)
   }
 
   const handleSubmitOrder = async () => {
@@ -138,33 +142,38 @@ export default function OrderEntryPage() {
 
       const result = await response.json()
 
+      console.log("[v0] Order submission result:", result)
+
       if (!response.ok) {
-        console.error("[v0] Order submission failed:", result)
-        throw new Error(result.details || result.error || "Failed to submit order")
+        throw new Error(result.error || "Failed to submit order")
       }
 
-      console.log("[v0] Order submitted successfully:", result)
-
-      alert("Đơn hàng đã được gửi thành công!")
-
-      // Reset form
-      setOrderItems([])
-      setCustomerName("")
-      setCustomerAddress("")
-      setCustomerPhone("")
-      setCustomerEmail("")
-      setShipToAddress("")
-      setBillingToName("")
-      setBillingToAddress("")
-      setBillingToTaxReg("")
-      setShowReviewPage(false)
-    } catch (error: any) {
+      setShowConfirmation(false)
+      setShowSuccessModal(true)
+    } catch (error) {
       console.error("[v0] Error submitting order:", error)
-      alert(`Có lỗi xảy ra khi gửi đơn hàng: ${error.message}. Vui lòng thử lại.`)
+      setShowConfirmation(false)
+      setErrorMessage(error instanceof Error ? error.message : "Unknown error")
+      setShowErrorModal(true)
     }
   }
 
-  if (showReviewPage) {
+  const handleReturnToOrder = () => {
+    setShowSuccessModal(false)
+    setShowErrorModal(false)
+    setShowReview(false)
+    setCustomerName("")
+    setCustomerAddress("")
+    setCustomerPhone("")
+    setCustomerEmail("")
+    setShipToAddress("")
+    setBillingToName("")
+    setBillingToAddress("")
+    setBillingToTaxReg("")
+    setOrderItems([])
+  }
+
+  if (showReview) {
     return (
       <ReviewOrderPage
         orderHeader={{
@@ -180,7 +189,7 @@ export default function OrderEntryPage() {
           billingToTaxReg,
         }}
         orderItems={orderItems}
-        onBack={() => setShowReviewPage(false)}
+        onBack={() => setShowReview(false)}
         onSubmitSuccess={handleSubmitOrder}
       />
     )
@@ -456,6 +465,62 @@ export default function OrderEntryPage() {
           </div>
         )}
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Thành công!</h3>
+            <p className="text-muted-foreground mb-6">Đơn hàng đã được gửi thành công.</p>
+            <button
+              onClick={handleReturnToOrder}
+              className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
+            <h3 className="text-lg font-semibold text-destructive mb-4">Có lỗi xảy ra</h3>
+            <p className="text-muted-foreground mb-6">{errorMessage || "Vui lòng thử lại."}</p>
+            <button
+              onClick={handleReturnToOrder}
+              className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Xác nhận đơn hàng</h3>
+            <p className="text-muted-foreground mb-6">Bạn chắc chắn đặt hàng với thông tin này chứ?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmation(false)}
+                className="flex-1 bg-muted text-foreground px-4 py-2 rounded-md hover:bg-muted/80 transition-colors"
+              >
+                No
+              </button>
+              <button
+                onClick={handleSubmitOrder}
+                className="flex-1 bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -471,8 +536,6 @@ function ReviewOrderPage({
   onBack: () => void
   onSubmitSuccess: () => void
 }) {
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
-
   const calculateTotal = () => {
     return orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
   }
@@ -487,12 +550,6 @@ function ReviewOrderPage({
   }
 
   const handleSubmit = () => {
-    setShowConfirmModal(true)
-  }
-
-  const confirmOrder = () => {
-    alert("Order submitted successfully!")
-    setShowConfirmModal(false)
     onSubmitSuccess()
   }
 
@@ -627,22 +684,6 @@ function ReviewOrderPage({
           </div>
         </Card>
       </div>
-
-      {/* Confirmation Modal with Vietnamese text */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Xác nhận đặt hàng</h3>
-            <p className="text-foreground mb-6">Bạn chắc chắn đặt hàng với thông tin này chứ?</p>
-            <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowConfirmModal(false)}>
-                No
-              </Button>
-              <Button onClick={confirmOrder}>Yes</Button>
-            </div>
-          </Card>
-        </div>
-      )}
     </div>
   )
 }
