@@ -4,55 +4,55 @@ export async function POST(request: Request) {
   try {
     const orderData = await request.json()
 
-    // // 1. Save to database
-    // // Example with Supabase:
-    // // const { createServerClient } = require('@supabase/ssr')
-    // // const supabase = createServerClient(
-    // //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    // //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    // //   {
-    // //     cookies: {
-    // //       get: (name: string) => request.cookies.get(name)?.value,
-    // //     },
-    // //   }
-    // // )
-    //
-    // // Insert order header
-    // const { data: order, error: orderError } = await supabase
-    //   .from('orders')
-    //   .insert({
-    //     order_number: orderData.orderNumber,
-    //     order_date: orderData.orderDate,
-    //     customer_name: orderData.customerName,
-    //     customer_address: orderData.customerAddress,
-    //     customer_phone: orderData.customerPhone,
-    //     customer_email: orderData.customerEmail,
-    //     ship_to_address: orderData.shipToAddress,
-    //     billing_name: orderData.billingName,
-    //     billing_address: orderData.billingAddress,
-    //     billing_tax_number: orderData.billingTaxNumber,
-    //     subtotal: orderData.subtotal
-    //   })
-    //   .select()
-    //   .single()
-    //
-    // if (orderError) throw orderError
-    //
-    // // Insert order items
-    // const { error: itemsError } = await supabase
-    //   .from('order_items')
-    //   .insert(
-    //     orderData.items.map((item: any) => ({
-    //       order_id: order.id,
-    //       product_id: item.productId,
-    //       product_name: item.productName,
-    //       quantity: item.quantity,
-    //       unit_price: item.unitPrice,
-    //       total: item.total
-    //     }))
-    //   )
-    //
-    // if (itemsError) throw itemsError
+    // 1. Save to database
+    // Example with Supabase:
+    // const { createServerClient } = require('@supabase/ssr')
+    // const supabase = createServerClient(
+    //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    //   {
+    //     cookies: {
+    //       get: (name: string) => request.cookies.get(name)?.value,
+    //     },
+    //   }
+    // )
+    
+    // Insert order header
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        order_number: orderData.orderNumber,
+        order_date: orderData.orderDate,
+        customer_name: orderData.customerName,
+        customer_address: orderData.customerAddress,
+        customer_phone: orderData.customerPhone,
+        customer_email: orderData.customerEmail,
+        ship_to_address: orderData.shipToAddress,
+        billing_name: orderData.billingName,
+        billing_address: orderData.billingAddress,
+        billing_tax_number: orderData.billingTaxNumber,
+        subtotal: orderData.subtotal
+      })
+      .select()
+      .single()
+    
+    if (orderError) throw orderError
+    
+    // Insert order items
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(
+        orderData.items.map((item: any) => ({
+          order_id: order.id,
+          product_id: item.productId,
+          product_name: item.productName,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          total: item.total
+        }))
+      )
+    
+    if (itemsError) throw itemsError
 
     // 2. Send Slack notification
     await sendSlackNotification(orderData)
