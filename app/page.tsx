@@ -418,7 +418,7 @@ export default function OrderEntryPage() {
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm">{product.name}</div>
-                      <div className="text-xs text-muted-foreground">{product.description}</div>
+                      <div className="text-xs text-muted-foreground whitespace-pre-line">{product.description}</div>
                     </div>
                     <div className="text-sm font-semibold text-right ml-2 shrink-0">
                       {product.price.toLocaleString()} VND
@@ -656,7 +656,9 @@ function ReviewOrderPage({
                     <td className="text-foreground px-4 py-3">{item.name}</td>
                     <td className="text-right text-foreground px-4 py-3">{formatVND(item.price)} VND</td>
                     <td className="text-center font-medium text-foreground px-4 py-3">{item.quantity}</td>
-                    <td className="text-right font-semibold text-foreground px-4 py-3">{formatVND(item.total)} VND</td>
+                    <td className="text-right text-xl font-bold text-foreground px-4 py-3">
+                      {formatVND(item.total)} VND
+                    </td>
                   </tr>
                 ))}
               </tbody>
