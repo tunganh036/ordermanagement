@@ -125,6 +125,14 @@ async function sendSlackNotification(orderData: any) {
           },
           {
             type: "mrkdwn",
+            text: `*Ship To:*\n${orderData.shipToAddress}`,
+          },
+          {
+            type: "mrkdwn",
+            text: `*Tax Number:*\n${orderData.billingTaxNumber}`,
+          },
+          {
+            type: "mrkdwn",
             text: `*Total:*\n${formattedSubtotal} VND`,
           },
         ],
