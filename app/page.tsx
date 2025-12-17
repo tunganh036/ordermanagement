@@ -355,10 +355,19 @@ export default function OrderEntryPage() {
 					<label className="text-sm font-medium text-foreground block mb-1">
 					  Customer Name <span className="text-red-500">*</span>
 					</label>
-					<Input value={customerName} onChange={(e) => setCustomerName(e.target.value)
-																				if (!billingToName) {
-																				  setBillingToName(e.target.value)
-																				}} 
+					<Input
+					  id="customer-name"
+					  type="text"
+					  placeholder="Enter customer name..."
+					  value={customerName}
+					  onChange={(e) => {
+						setCustomerName(e.target.value)
+						// Auto-fill Billing To Name
+						if (!billingToName) {
+						  setBillingToName(e.target.value)
+						}
+					  }}
+					  required
 					/>
 				  </div>
 
@@ -366,14 +375,22 @@ export default function OrderEntryPage() {
 					<label className="text-sm font-medium text-foreground block mb-1">
 					  Customer Address <span className="text-red-500">*</span>
 					</label>
-					<Input value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)
-																						if (!shipToAddress) {
-																							  setShipToAddress(e.target.value)
-																							}
-																						if (!billingToAddress) {
-																						  setBillingToAddress(e.target.value)
-																						}
-															} 
+					<Input
+					  id="customer-address"
+					  type="text"
+					  placeholder="Enter customer address..."
+					  value={customerAddress}
+					  onChange={(e) => {
+						setCustomerAddress(e.target.value)
+						// Auto-fill Ship To Address and Bill To Address
+						if (!shipToAddress) {
+						  setShipToAddress(e.target.value)
+						}
+						if (!billingToAddress) {
+						  setBillingToAddress(e.target.value)
+						}
+					  }}
+					  required
 					/>
 				  </div>
 
