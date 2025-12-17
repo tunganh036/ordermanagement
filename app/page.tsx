@@ -355,14 +355,27 @@ export default function OrderEntryPage() {
 					<label className="text-sm font-medium text-foreground block mb-1">
 					  Customer Name <span className="text-red-500">*</span>
 					</label>
-					<Input value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+					<Input value={customerName} onChange={(e) => setCustomerName(e.target.value)
+																				if (!billingToName) {
+																				  setBillingToName(e.target.value)
+																				}
+														 } 
+					/>
 				  </div>
 
 				  <div className="lg:col-span-2">
 					<label className="text-sm font-medium text-foreground block mb-1">
 					  Customer Address <span className="text-red-500">*</span>
 					</label>
-					<Input value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} />
+					<Input value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)
+																						if (!shipToAddress) {
+																							  setShipToAddress(e.target.value)
+																							}
+																						if (!billingToAddress) {
+																						  setBillingToAddress(e.target.value)
+																						}
+															} 
+					/>
 				  </div>
 
 				  <div>
