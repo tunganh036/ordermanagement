@@ -366,12 +366,16 @@ export default function OrderEntryPage() {
 				  </div>
 
 				  <div>
-					<label className="text-sm font-medium text-foreground block mb-1">Customer Phone</label>
+					<label className="text-sm font-medium text-foreground block mb-1">
+					  Customer Phone <span className="text-red-500">*</span>
+					</label>
 					<Input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
 				  </div>
 
 				  <div>
-					<label className="text-sm font-medium text-foreground block mb-1">Customer Email</label>
+					<label className="text-sm font-medium text-foreground block mb-1">
+					  Customer Email <span className="text-red-500">*</span>
+					</label>
 					<Input value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
 				  </div>
 
@@ -389,6 +393,12 @@ export default function OrderEntryPage() {
 					<label className="text-sm font-medium text-foreground block mb-1">Billing To Address</label>
 					<Input value={billingToAddress} onChange={(e) => setBillingToAddress(e.target.value)} />
 				  </div>
+				  
+				  <div className="lg:col-span-2">
+					<label className="text-sm font-medium text-foreground block mb-1">Billing To Tax Registration Number</label>
+					<Input value={billingToTaxReg} onChange={(e) => setBillingToTaxReg(e.target.value)} />
+				  </div>
+				  
 				</div>
 			  </Card>
 
