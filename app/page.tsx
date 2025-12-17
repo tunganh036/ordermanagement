@@ -303,7 +303,7 @@ export default function OrderEntryPage() {
           <div className="px-6 py-6 bg-card border-b border-border">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-foreground">Order Header</h2>
-              <a href="/catalog.pdf" download className="text-sm text-primary hover:underline flex items-center gap-1">
+              <a href="/ORION_CATALOGUE_B2B_TET2026_20251104.pdf" download className="text-sm text-primary hover:underline flex items-center gap-1">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
