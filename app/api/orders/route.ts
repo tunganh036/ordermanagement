@@ -83,6 +83,21 @@ async function sendSlackNotification(orderData: any) {
     return
   }
 
+  const itemsList = orderData.items
+    .map((item: any) => {
+      const itemTotal = (item.total || item.price * item.quantity).toLocaleString("vi-VN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+      return `• ${item.name} (x${item.quantity}) - ${itemTotal} VND`
+    })
+    .join("\n")
+
+  const formattedSubtotal = orderData.subtotal.toLocaleString("vi-VN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+
   const message = {
     text: `🎉 New Order Received!`,
     blocks: [
@@ -110,7 +125,7 @@ async function sendSlackNotification(orderData: any) {
           },
           {
             type: "mrkdwn",
-            text: `*Total:*\n${orderData.subtotal} VND`,
+            text: `*Total:*\n${formattedSubtotal} VND`,
           },
         ],
       },
@@ -118,7 +133,7 @@ async function sendSlackNotification(orderData: any) {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `*Items:*\n${orderData.items.map((item: any) => `• ${item.productName} (x${item.quantity}) - ${item.total} VND`).join("\n")}`,
+          text: `*Items:*\n${itemsList}`,
         },
       },
     ],

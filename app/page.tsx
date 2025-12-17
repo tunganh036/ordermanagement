@@ -12,6 +12,7 @@ type OrderItem = {
   description: string
   price: number
   quantity: number
+  total: number
 }
 
 type Product = {
@@ -71,7 +72,7 @@ export default function OrderEntryPage() {
         orderItems.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)),
       )
     } else {
-      setOrderItems([...orderItems, { ...product, quantity: 1 }])
+      setOrderItems([...orderItems, { ...product, quantity: 1, total: product.price * 1 }])
     }
   }
 
@@ -82,7 +83,7 @@ export default function OrderEntryPage() {
         .map((item) => {
           if (item.id === id) {
             const newQuantity = item.quantity + delta
-            return newQuantity > 0 ? { ...item, quantity: newQuantity } : item
+            return newQuantity > 0 ? { ...item, quantity: newQuantity, total: item.price * newQuantity } : item
           }
           return item
         })
@@ -92,7 +93,7 @@ export default function OrderEntryPage() {
 
   // Calculate totals
   const calculateTotal = () => {
-    return orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    return orderItems.reduce((sum, item) => sum + item.total, 0)
   }
 
   const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0)
@@ -126,6 +127,7 @@ export default function OrderEntryPage() {
           name: item.name,
           price: item.price,
           quantity: item.quantity,
+          total: item.total,
         })),
         subtotal: calculateTotal(),
       }
@@ -145,11 +147,17 @@ export default function OrderEntryPage() {
       console.log("[v0] Order submission result:", result)
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to submit order")
+        throw new Error(result.details || result.error || "Failed to submit order")
       }
 
+      // Close confirmation and navigate back to order page first
       setShowConfirmation(false)
-      setShowSuccessModal(true)
+      setShowReview(false)
+
+      // Then show success modal
+      setTimeout(() => {
+        setShowSuccessModal(true)
+      }, 100)
     } catch (error) {
       console.error("[v0] Error submitting order:", error)
       setShowConfirmation(false)
@@ -431,7 +439,7 @@ export default function OrderEntryPage() {
                               </div>
                             </td>
                             <td className="text-right font-medium text-foreground text-sm px-3 py-2">
-                              {formatVND(item.price * item.quantity)} VND
+                              {formatVND(item.total)} VND
                             </td>
                           </tr>
                         ))}
@@ -536,7 +544,7 @@ function ReviewOrderPage({
   onSubmitSuccess: () => void
 }) {
   const calculateTotal = () => {
-    return orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    return orderItems.reduce((sum, item) => sum + item.total, 0)
   }
 
   const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0)
@@ -655,9 +663,7 @@ function ReviewOrderPage({
                     <td className="text-foreground px-4 py-3">{item.name}</td>
                     <td className="text-right text-foreground px-4 py-3">{formatVND(item.price)} VND</td>
                     <td className="text-center font-medium text-foreground px-4 py-3">{item.quantity}</td>
-                    <td className="text-right font-semibold text-foreground px-4 py-3">
-                      {formatVND(item.price * item.quantity)} VND
-                    </td>
+                    <td className="text-right font-semibold text-foreground px-4 py-3">{formatVND(item.total)} VND</td>
                   </tr>
                 ))}
               </tbody>
