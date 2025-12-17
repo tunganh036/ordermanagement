@@ -310,7 +310,7 @@ export default function OrderEntryPage() {
 			</header>
 
 			{/* ================= PAGE CONTENT WRAPPER ================= */}
-			<div className="mx-auto max-w-screen-2xl px-4 md:px-6 py-6">
+			<div className="mx-auto max-w-screen-2xl px-3 md:px-6 py-6">
 
 			  {/* ================= ORDER HEADER ================= */}
 			  <Card className="p-6 mb-6">
