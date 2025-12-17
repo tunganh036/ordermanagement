@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 
+export async function GET() {
+  const orders = await db.orders.findMany({ include: { items: true } }) // Lấy all orders với items
+  return NextResponse.json(orders)
+}
+
 export async function POST(request: Request) {
   try {
     const orderData = await request.json()
