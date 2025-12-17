@@ -723,9 +723,13 @@ function ReviewOrderPage({
               <p className="text-foreground font-medium">{orderHeader.billingToTaxReg || "-"}</p>
             </div>
 			
-			<div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">⚠️ LƯU Ý: ĐƠN GIÁ NÀY CÓ THỂ CHƯA BAO GỒM THUẾ</label>
-            </div>
+			<div className="lg:col-span-4 mt-4 pt-4 border-t border-border">
+				<p className="text-red-600 font-bold text-lg flex items-center gap-2">
+				  <span className="text-2xl">⚠️</span>
+				  LƯU Ý: ĐƠN GIÁ NÀY CÓ THỂ CHƯA BAO GỒM THUẾ
+				</p>
+			  </div>
+			</div>
 			
           </div>
         </Card>
