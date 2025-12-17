@@ -670,69 +670,69 @@ function ReviewOrderPage({
       </header>
 
       <div className="mx-auto max-w-screen-2xl px-4 md:px-6 py-8">
-        <Card className="p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Order Number</label>
-              <p className="text-foreground font-medium">{orderHeader.orderNumber}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Ngày Đặt Hàng</label>
-              <p className="text-foreground font-medium">{orderHeader.orderDate}</p>
-            </div>
-
-            <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Tên Khách Hàng</label>
-              <p className="text-foreground font-medium">{orderHeader.customerName || "-"}</p>
-            </div>
-
-            <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Địa Chỉ Khách Hàng</label>
-              <p className="text-foreground font-medium">{orderHeader.customerAddress || "-"}</p>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Số Điện Thoại Đặt Hàng</label>
-              <p className="text-foreground font-medium">{orderHeader.customerPhone || "-"}</p>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Email Khách Hàng</label>
-              <p className="text-foreground font-medium">{orderHeader.customerEmail || "-"}</p>
-            </div>
-
-            <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Địa Chỉ Giao Hàng</label>
-              <p className="text-foreground font-medium">{orderHeader.shipToAddress || "-"}</p>
-            </div>
-
-            <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Tên Xuất Hóa Đơn</label>
-              <p className="text-foreground font-medium">{orderHeader.billingToName || "-"}</p>
-            </div>
-
-            <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Địa Chỉ Xuất Hóa Đơn</label>
-              <p className="text-foreground font-medium">{orderHeader.billingToAddress || "-"}</p>
-            </div>
-
-            <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">
-                Mã Số Thuế
-              </label>
-              <p className="text-foreground font-medium">{orderHeader.billingToTaxReg || "-"}</p>
-            </div>
-			
-			<div className="lg:col-span-4 mt-4 pt-4 border-t border-border">
-				<p className="text-red-600 font-bold text-lg flex items-center gap-2">
-				  <span className="text-2xl">⚠️</span>
-				  LƯU Ý: ĐƠN GIÁ NÀY CÓ THỂ CHƯA BAO GỒM THUẾ
-				</p>
-			  </div>
+        {/* Order Header */}
+		<Card className="p-6 mb-6">
+		  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+			<div>
+			  <label className="text-sm font-medium text-muted-foreground block mb-1">Order Number</label>
+			  <p className="text-foreground font-medium">{orderHeader.orderNumber}</p>
 			</div>
-			
-          </div>
-        </Card>
+			<div>
+			  <label className="text-sm font-medium text-muted-foreground block mb-1">Ngày Đặt Hàng</label>
+			  <p className="text-foreground font-medium">{orderHeader.orderDate}</p>
+			</div>
+
+			<div className="lg:col-span-2">
+			  <label className="text-sm font-medium text-muted-foreground block mb-1">Tên Khách Hàng</label>
+			  <p className="text-foreground font-medium">{orderHeader.customerName || "-"}</p>
+			</div>
+
+			<div className="lg:col-span-2">
+			  <label className="text-sm font-medium text-muted-foreground block mb-1">Địa Chỉ Khách Hàng</label>
+			  <p className="text-foreground font-medium">{orderHeader.customerAddress || "-"}</p>
+			</div>
+
+			<div>
+			  <label className="text-sm font-medium text-muted-foreground block mb-1">Số Điện Thoại</label>
+			  <p className="text-foreground font-medium">{orderHeader.customerPhone || "-"}</p>
+			</div>
+
+			<div>
+			  <label className="text-sm font-medium text-muted-foreground block mb-1">Email Đặt Hàng</label>
+			  <p className="text-foreground font-medium">{orderHeader.customerEmail || "-"}</p>
+			</div>
+
+			<div className="lg:col-span-2">
+			  <label className="text-sm font-medium text-muted-foreground block mb-1">Địa Chỉ Giao Hàng</label>
+			  <p className="text-foreground font-medium">{orderHeader.shipToAddress || "-"}</p>
+			</div>
+
+			<div className="lg:col-span-2">
+			  <label className="text-sm font-medium text-muted-foreground block mb-1">Tên Xuất Hóa Đơn</label>
+			  <p className="text-foreground font-medium">{orderHeader.billingToName || "-"}</p>
+			</div>
+
+			<div className="lg:col-span-2">
+			  <label className="text-sm font-medium text-muted-foreground block mb-1">Địa Chỉ Xuất Hóa Đơn</label>
+			  <p className="text-foreground font-medium">{orderHeader.billingToAddress || "-"}</p>
+			</div>
+
+			<div className="lg:col-span-2">
+			  <label className="text-sm font-medium text-muted-foreground block mb-1">
+				Mã Số Thuế
+			  </label>
+			  <p className="text-foreground font-medium">{orderHeader.billingToTaxReg || "-"}</p>
+			</div>
+
+			{/* Dòng lưu ý - nổi bật, full width */}
+			<div className="lg:col-span-4 mt-4 pt-4 border-t border-border">
+			  <p className="text-red-600 font-bold text-lg flex items-center gap-2">
+				<span className="text-2xl">⚠️</span>
+				LƯU Ý: ĐƠN GIÁ NÀY CÓ THỂ CHƯA BAO GỒM THUẾ
+			  </p>
+			</div>
+		  </div>
+		</Card>
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold text-foreground mb-4">Chi Tiết Đơn Hàng</h2>
