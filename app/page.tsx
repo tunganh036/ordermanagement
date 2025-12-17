@@ -251,8 +251,8 @@ export default function OrderEntryPage() {
             <div className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
               <h3 className="text-lg font-semibold text-foreground mb-4">Xác nhận đơn hàng</h3>
               <p className="text-muted-foreground mb-6">
-				<br>Bạn chắc chắn đặt hàng với thông tin này chứ?</br>
-				<br>LƯU Ý: ĐƠN GIÁ NÀY CÓ THỂ CHƯA THUẾ</br>
+				Bạn chắc chắn đặt hàng với thông tin này chứ?</br>
+				LƯU Ý: ĐƠN GIÁ NÀY CÓ THỂ CHƯA THUẾ</br>
 			  </p>
               <div className="flex gap-3">
                 <button
