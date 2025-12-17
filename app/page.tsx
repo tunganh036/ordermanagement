@@ -45,7 +45,7 @@ export default function OrderEntryPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoadingProducts, setIsLoadingProducts] = useState(true)
   
-  const generateOrderNumber = () => `ORD-${Date.now()}` //Changed by AnhNT to refresh the order number
+  const generateOrderNumber = () => `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}` //Changed by AnhNT to refresh the order number
 
   useEffect(() => {
     const fetchProducts = async () => {
