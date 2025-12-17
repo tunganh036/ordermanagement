@@ -69,7 +69,11 @@ export default function OrderEntryPage() {
 
     if (existingItem) {
       setOrderItems(
-        orderItems.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)),
+        orderItems.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1, total: item.price * (item.quantity + 1) }
+            : item,
+        ),
       )
     } else {
       setOrderItems([...orderItems, { ...product, quantity: 1, total: product.price * 1 }])
