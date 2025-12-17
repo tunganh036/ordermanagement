@@ -24,7 +24,8 @@ type Product = {
 }
 
 export default function OrderEntryPage() {
-  const [orderNumber] = useState(`ORD-${Date.now()}`)
+  //const [orderNumber] = useState(`ORD-${Date.now()}`) //Changed by AnhNT to refresh the order number
+  const [orderNumber, setOrderNumber] = useState("") //Changed by AnhNT to refresh the order number
   const [orderDate] = useState(new Date().toISOString().split("T")[0])
   const [customerName, setCustomerName] = useState("")
   const [customerAddress, setCustomerAddress] = useState("")
@@ -43,6 +44,8 @@ export default function OrderEntryPage() {
   const [errorMessage, setErrorMessage] = useState("")
   const [products, setProducts] = useState<Product[]>([])
   const [isLoadingProducts, setIsLoadingProducts] = useState(true)
+  
+  const generateOrderNumber = () => `ORD-${Date.now()}` //Changed by AnhNT to refresh the order number
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -60,6 +63,12 @@ export default function OrderEntryPage() {
 
     fetchProducts()
   }, [])
+  
+  //Changed by AnhNT to refresh the order number
+  useEffect(() => {
+  setOrderNumber(generateOrderNumber())
+	}, [])
+  //Changed by AnhNT to refresh the order number
 
   const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
@@ -200,6 +209,7 @@ export default function OrderEntryPage() {
     setShowSuccessModal(false)
     setShowErrorModal(false)
     setShowReview(false)
+	setOrderNumber(generateOrderNumber()) // RESET ORDER HEADER
     setCustomerName("")
     setCustomerAddress("")
     setCustomerPhone("")
@@ -208,7 +218,7 @@ export default function OrderEntryPage() {
     setBillingToName("")
     setBillingToAddress("")
     setBillingToTaxReg("")
-    setOrderItems([])
+    setOrderItems([]) // RESET ORDER ITEMS
   }
 
   if (showReview) {
