@@ -457,6 +457,16 @@ export default function OrderEntryPage() {
 				  )}
 				</Card>
 			  </div>
+			  
+		    {/* Review Section */}
+            {orderItems.length > 0 && (
+              <div className="fixed bottom-6 right-6">
+                <Button onClick={handleReviewOrder} size="lg" className="shadow-lg">
+                  Review Order
+                </Button>
+              </div>
+            )}
+			
 			</div>
 		  </>
 		) : null}
