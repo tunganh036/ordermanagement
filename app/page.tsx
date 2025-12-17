@@ -615,16 +615,16 @@ export default function OrderEntryPage() {
 							))}
 						  </tbody>
 						  <tfoot className="bg-muted/30 font-semibold">
-							<tr>
-							  <td colSpan={3} className="text-right px-4 py-4">
-								Tổng cộng
-							  </td>
-							  <td className="text-right px-3 py-3 text-xl text-foreground">
-								{formatVND(calculateTotal())} VND
-							  </td>
-							  <td></td>
-							</tr>
-						  </tfoot>
+							  <tr>
+								<td colSpan={3} className="text-right px-4 py-4 pr-12">
+								  Tổng cộng
+								</td>
+								<td className="text-right px-4 py-4 text-xl font-bold text-foreground">
+								  {formatVND(calculateTotal())}
+								</td>
+								<td></td>
+							  </tr>
+							</tfoot>
 						</table>
 					  </div>
 					</>
@@ -665,12 +665,12 @@ function ReviewOrderPage({
 
   const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0)
 
-  const formatVND = (amount: number) => {
-    return amount.toLocaleString("en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    })
-  }
+	const formatVND = (amount: number) => {
+	  return amount.toLocaleString("en-US", {
+		minimumFractionDigits: 0,  // Quan trọng: 0 để không ép .00
+		maximumFractionDigits: 2,  // Giữ 2 để nếu có phần lẻ thì vẫn hiện
+	  })
+	}
 
   return (
     <div className="min-h-screen bg-background">
