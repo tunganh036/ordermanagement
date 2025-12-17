@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
-import { Search } from "lucide-react"
+import { Search, Plus, Minus, Trash2 } from "lucide-react"
 
 type OrderItem = {
   id: number
