@@ -301,57 +301,45 @@ export default function OrderEntryPage() {
   }
 
   return (
-		<div className="min-h-screen bg-background">
-		  {!showReview ? (
-			<>
-			  {/* Header */}
-
-			  {/*
-			  <header className="bg-card border-b border-border px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+    <div className="min-h-screen bg-background">
+      {!showReview ? (
+        <>
+          {/* Header */}
+		  {/*
+		  <header className="bg-card border-b border-border px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+            <h1 className="text-2xl font-bold text-foreground">Order Place - ANHNT</h1>
+          </header>
+		  */}
+		  
+		  <header className="bg-card border-b border-border sticky top-0 z-10">
+			  <div className="mx-auto max-w-screen-2xl px-4 md:px-6 py-4 flex items-center justify-between">
 				<h1 className="text-2xl font-bold text-foreground">Order Place - ANHNT</h1>
-			  </header>
-			  */}
-
-			  <header className="bg-card border-b border-border sticky top-0 z-10">
-				<div className="mx-auto max-w-screen-2xl px-4 md:px-6 py-4 flex items-center justify-between">
-				  <h1 className="text-2xl font-bold text-foreground">Order Place - ANHNT</h1>
-				</div>
-			  </header>
-
-			  {/* Order Header */}
-
-			  {/*
-			  <div className="px-6 py-6 bg-card border-b border-border">
-			  */}
-
-			  <div className="bg-background py-6 border-b border-border">
-				<div className="mx-auto max-w-screen-2xl px-4 md:px-6">
-				  <Card className="p-6">
-					<div className="flex items-center justify-between mb-4">
-					  <h2 className="text-lg font-semibold text-foreground">Order Header</h2>
-					  <a
-						href="/ORION_CATALOGUE_B2B_TET2026_20251104.pdf"
-						download
-						className="text-sm text-primary hover:underline flex items-center gap-1"
-					  >
-						<svg
-						  xmlns="http://www.w3.org/2000/svg"
-						  width="16"
-						  height="16"
-						  viewBox="0 0 24 24"
-						  fill="none"
-						  stroke="currentColor"
-						  strokeWidth="2"
-						  strokeLinecap="round"
-						  strokeLinejoin="round"
-						>
-						  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-						  <polyline points="7 10 12 15 17 10" />
-						  <line x1="12" y1="15" x2="12" y2="3" />
-						</svg>
-						Click here to download the Catalog
-					  </a>
-					</div>
+			  </div>
+		  </header>
+		  
+          {/* Order Header */}
+          <div className="px-6 py-6 bg-card border-b border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Order Header</h2>
+              <a href="/ORION_CATALOGUE_B2B_TET2026_20251104.pdf" download className="text-sm text-primary hover:underline flex items-center gap-1">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Click here to download the Catalog
+              </a>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Order Info */}
