@@ -23,6 +23,13 @@ type Product = {
   is_active?: boolean
 }
 
+  const formatVND = (amount: number) => {
+    return amount.toLocaleString("en-US", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })
+  }
+
 export default function OrderEntryPage() {
   const [orderNumber, setOrderNumber] = useState("")
   const [orderDate] = useState(new Date().toISOString().split("T")[0])
@@ -119,12 +126,6 @@ export default function OrderEntryPage() {
 
   const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0)
 
-  const formatVND = (amount: number) => {
-    return amount.toLocaleString("en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    })
-  }
 
   // Validation
   const validateRequiredFields = () => {
