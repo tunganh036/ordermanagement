@@ -118,7 +118,7 @@ export default function OrderEntryPage() {
     })
   }
 
-  const validateRequiredFields = () => {
+  {/*const validateRequiredFields = () => {
     if (!customerName.trim()) {
       setErrorMessage("Customer Name is required")
       setShowErrorModal(true)
@@ -140,8 +140,16 @@ export default function OrderEntryPage() {
       return false
     }
     return true
+  }*/}
+  const validateRequiredFields = () => {
+  if (!customerName.trim()) return "Customer Name is required"
+  if (!customerAddress.trim()) return "Customer Address is required"
+  if (!customerEmail.trim()) return "Customer Email is required"
+  if (!customerPhone.trim()) return "Customer Phone Number is required"
+  return null
   }
 
+  {/*
   const handleReviewOrder = () => {
     if (orderItems.length === 0) {
       setErrorMessage("Please add at least one item to the order")
@@ -152,7 +160,24 @@ export default function OrderEntryPage() {
       return
     }
     setShowReview(true)
+  }*/}
+  const handleReviewOrder = () => {
+  if (orderItems.length === 0) {
+    setErrorMessage("Please add at least one item to the order")
+    setShowErrorModal(true)
+    return
   }
+  {/*Add thêm hàm Error*/}
+    const error = validateRequiredFields()
+	  if (error) {
+		setErrorMessage(error)
+		setShowErrorModal(true)
+		return
+	  }
+
+	  // Chỉ show Review khi không có lỗi
+	  setShowReview(true)
+	}
 
   const handleSubmitOrder = async () => {
     try {
@@ -336,7 +361,7 @@ export default function OrderEntryPage() {
 					  <polyline points="7 10 12 15 17 10" />
 					  <line x1="12" y1="15" x2="12" y2="3" />
 					</svg>
-					Click here to download the Catalog
+					Tải về Catalog
 				  </a>
 				</div>
 
@@ -347,13 +372,13 @@ export default function OrderEntryPage() {
 				  </div>
 
 				  <div>
-					<label className="text-sm font-medium text-foreground block mb-1">Order Date</label>
+					<label className="text-sm font-medium text-foreground block mb-1">Ngày Đặt Hàng</label>
 					<Input value={orderDate} disabled className="bg-muted" />
 				  </div>
 
 				  <div className="lg:col-span-2">
 					<label className="text-sm font-medium text-foreground block mb-1">
-					  Customer Name <span className="text-red-500">*</span>
+					  Tên Khách Hàng <span className="text-red-500">*</span>
 					</label>
 					<Input
 					  id="customer-name"
@@ -373,7 +398,7 @@ export default function OrderEntryPage() {
 
 				  <div className="lg:col-span-2">
 					<label className="text-sm font-medium text-foreground block mb-1">
-					  Customer Address <span className="text-red-500">*</span>
+					  Địa Chỉ Khách Hàng <span className="text-red-500">*</span>
 					</label>
 					<Input
 					  id="customer-address"
@@ -396,36 +421,74 @@ export default function OrderEntryPage() {
 
 				  <div>
 					<label className="text-sm font-medium text-foreground block mb-1">
-					  Customer Phone <span className="text-red-500">*</span>
+					  Số Điện Thoại Đặt Hàng <span className="text-red-500">*</span>
 					</label>
-					<Input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} />
+					<Input
+					  id="customer-phone"
+					  type="tel"
+					  placeholder="Enter phone number..."
+					  value={customerPhone}
+					  onChange={(e) => setCustomerPhone(e.target.value)}
+					  required
+					/>
 				  </div>
 
 				  <div>
 					<label className="text-sm font-medium text-foreground block mb-1">
-					  Customer Email <span className="text-red-500">*</span>
+					  Email Đặt Hàng <span className="text-red-500">*</span>
 					</label>
-					<Input value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} />
+					<Input
+					  id="customer-email"
+					  type="email"
+					  placeholder="Enter email..."
+					  value={customerEmail}
+					  onChange={(e) => setCustomerEmail(e.target.value)}
+					  required
+					/>
 				  </div>
 
 				  <div className="lg:col-span-2">
-					<label className="text-sm font-medium text-foreground block mb-1">Ship To Address</label>
-					<Input value={shipToAddress} onChange={(e) => setShipToAddress(e.target.value)} />
+					<label className="text-sm font-medium text-foreground block mb-1">Địa Chỉ Giao Hàng</label>
+					<Input
+					  id="ship-to-address"
+					  type="text"
+					  placeholder="Enter shipping address..."
+					  value={shipToAddress}
+					  onChange={(e) => setShipToAddress(e.target.value)}
+					/>
 				  </div>
 
 				  <div className="lg:col-span-2">
-					<label className="text-sm font-medium text-foreground block mb-1">Billing To Name</label>
-					<Input value={billingToName} onChange={(e) => setBillingToName(e.target.value)} />
+					<label className="text-sm font-medium text-foreground block mb-1">Tên Xuất Hóa Đơn</label>
+					<Input
+					  id="billing-name"
+					  type="text"
+					  placeholder="Enter billing name..."
+					  value={billingToName}
+					  onChange={(e) => setBillingToName(e.target.value)}
+					/>
 				  </div>
 
 				  <div className="lg:col-span-2">
-					<label className="text-sm font-medium text-foreground block mb-1">Billing To Address</label>
-					<Input value={billingToAddress} onChange={(e) => setBillingToAddress(e.target.value)} />
+					<label className="text-sm font-medium text-foreground block mb-1">Địa Chỉ Xuất Hóa Đơn</label>
+					<Input
+					  id="billing-address"
+					  type="text"
+					  placeholder="Enter billing address..."
+					  value={billingToAddress}
+					  onChange={(e) => setBillingToAddress(e.target.value)}
+					/>
 				  </div>
 				  
 				  <div className="lg:col-span-2">
-					<label className="text-sm font-medium text-foreground block mb-1">Billing To Tax Registration Number</label>
-					<Input value={billingToTaxReg} onChange={(e) => setBillingToTaxReg(e.target.value)} />
+					<label className="text-sm font-medium text-foreground block mb-1">Mã Số Thuế (nếu có)</label>
+					<Input
+					  id="billing-tax-reg"
+					  type="text"
+					  placeholder="Enter tax registration number..."
+					  value={billingToTaxReg}
+					  onChange={(e) => setBillingToTaxReg(e.target.value)}
+					/>
 				  </div>
 				  
 				</div>
@@ -491,7 +554,7 @@ export default function OrderEntryPage() {
             {orderItems.length > 0 && (
               <div className="fixed bottom-6 right-6">
                 <Button onClick={handleReviewOrder} size="lg" className="shadow-lg">
-                  Review Order
+                  Xem Lại Đơn Hàng
                 </Button>
               </div>
             )}
