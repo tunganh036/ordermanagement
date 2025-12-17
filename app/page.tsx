@@ -536,7 +536,7 @@ export default function OrderEntryPage() {
 
             {/* Review Button */}
             {orderItems.length > 0 && (
-              <div className="fixed bottom-6 right--right-6">
+              <div className="fixed bottom-6 right-6">
                 <Button onClick={handleReviewOrder} size="lg" className="shadow-lg">
                   Xem Lại Đơn Hàng
                 </Button>
