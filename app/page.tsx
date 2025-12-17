@@ -296,7 +296,7 @@ export default function OrderEntryPage() {
         <>
           {/* Header */}
           <header className="bg-card border-b border-border px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-            <h1 className="text-2xl font-bold text-foreground">Order Entry System</h1>
+            <h1 className="text-2xl font-bold text-foreground">Order Place - ANHNT</h1>
           </header>
 
           {/* Order Header */}
