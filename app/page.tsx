@@ -673,10 +673,10 @@ function ReviewOrderPage({
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-8">
+      {/*<div className="container mx-auto px-6 py-8"> commentted to set bounder of order header*/}
+	  <div className="max-w-4xl mx-auto">
         {/* Order Header */}
-        {/*<Card className="p-6 mb-6"> commentted to set bounder of order header*/}
-		<Card className="p-6 mb-6 max-w-5xl mx-auto">
+        <Card className="p-6 mb-6">
           {/*<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">commentted to set bounder of order header*/}
 		  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
