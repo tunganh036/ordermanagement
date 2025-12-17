@@ -121,7 +121,7 @@ export default function OrderEntryPage() {
 
   const formatVND = (amount: number) => {
     return amount.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
+      minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     })
   }
@@ -504,7 +504,7 @@ export default function OrderEntryPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* PRODUCT MASTER LIST */}
               <Card className="p-4">
-                <h2 className="text-lg font-semibold mb-3">Product Master List</h2>
+                <h2 className="text-lg font-semibold mb-3">Danh Mục Sản Phẩm</h2>
                 <Input
                   placeholder="Search products..."
                   value={searchQuery}
@@ -665,12 +665,6 @@ function ReviewOrderPage({
 
   const totalItems = orderItems.reduce((sum, item) => sum + item.quantity, 0)
 
-	const formatVND = (amount: number) => {
-	  return amount.toLocaleString("en-US", {
-		minimumFractionDigits: 0,  // Quan trọng: 0 để không ép .00
-		maximumFractionDigits: 2,  // Giữ 2 để nếu có phần lẻ thì vẫn hiện
-	  })
-	}
 
   return (
     <div className="min-h-screen bg-background">
