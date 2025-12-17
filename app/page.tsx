@@ -96,6 +96,22 @@ export default function OrderEntryPage() {
     }
   }
 
+	// Phiên bản tốt hơn: cho phép giảm xuống 0 → tự động xóa sản phẩm khỏi giỏ
+	const updateQuantity = (id: number, delta: number) => {
+	  setOrderItems(prevItems =>
+		prevItems
+		  .map((item) => {
+			if (item.id === id) {
+			  const newQuantity = item.quantity + delta
+			  return newQuantity > 0
+				? { ...item, quantity: newQuantity, total: item.price * newQuantity }
+				: null
+			}
+			return item
+		  })
+		  .filter(Boolean) as OrderItem[]
+	  )
+	}
   // Calculate totals
   const calculateTotal = () => {
     return orderItems.reduce((sum, item) => sum + item.total, 0)
@@ -539,12 +555,12 @@ export default function OrderEntryPage() {
 							  <tr key={item.id} className="border-t border-border/50">
 								<td className="px-4 py-3 text-foreground">
 								  <div className="font-medium">{item.name}</div>
-								  {item.description && (
+								  {/*item.description && (
 									<div className="text-xs text-muted-foreground mt-1">{item.description}</div>
-								  )}
+								  )*/}
 								</td>
 								<td className="text-right px-4 py-3 text-foreground">
-								  {formatVND(item.price)} VND
+								  {formatVND(item.price)}
 								</td>
 								<td className="px-4 py-3">
 								  <div className="flex items-center justify-center gap-2">
@@ -581,7 +597,7 @@ export default function OrderEntryPage() {
 								  </div>
 								</td>
 								<td className="text-right px-4 py-3 font-semibold text-foreground">
-								  {formatVND(item.total)} VND
+								  {formatVND(item.total)}
 								</td>
 								<td className="text-center px-2">
 								  <Button
