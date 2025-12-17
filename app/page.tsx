@@ -674,11 +674,10 @@ function ReviewOrderPage({
 
       {/* Main Content */}
       {/*<div className="container mx-auto px-6 py-8"> commentted to set bounder of order header*/}
-	  <div className="max-w-4xl mx-auto">
+	  <div className="mx-auto max-w-screen-2xl px-4 md:px-6 py-8">
         {/* Order Header */}
         <Card className="p-6 mb-6">
-          {/*<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">commentted to set bounder of order header*/}
-		  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground block mb-1">Order Number</label>
               <p className="text-foreground font-medium">{orderHeader.orderNumber}</p>
@@ -733,7 +732,7 @@ function ReviewOrderPage({
         </Card>
 
         {/* Order Detail Panel */}
-        <Card className="p-6">
+        <Card className="p-4">
           <h2 className="text-lg font-semibold text-foreground mb-4">Order Detail</h2>
 
           <div className="border border-border rounded-md overflow-hidden">
