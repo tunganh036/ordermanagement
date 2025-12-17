@@ -516,27 +516,104 @@ export default function OrderEntryPage() {
               </Card>
 
               {/* ORDER DETAIL */}
-              <Card className="p-4">
-                <h2 className="text-lg font-semibold mb-3">Order Detail</h2>
+				<Card className="p-4">
+				  <h2 className="text-lg font-semibold mb-3">Order Detail</h2>
 
-                {orderItems.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-20">No items in order</div>
-                ) : (
-                  <div className="space-y-4">
-                    {orderItems.map((item) => (
-                      <div key={item.id} className="flex justify-between border-b pb-2">
-                        <span>{item.name} x {item.quantity}</span>
-                        <span className="font-medium">{formatVND(item.total)} VND</span>
-                      </div>
-                    ))}
-
-                    <div className="flex justify-between font-semibold text-lg pt-2 border-t">
-                      <span>Total</span>
-                      <span>{formatVND(calculateTotal())} VND</span>
-                    </div>
-                  </div>
-                )}
-              </Card>
+				  {orderItems.length === 0 ? (
+					<div className="text-center text-muted-foreground py-20">No items in order</div>
+				  ) : (
+					<>
+					  <div className="border border-border rounded-md overflow-hidden">
+						<table className="w-full">
+						  <thead className="bg-muted/50">
+							<tr>
+							  <th className="text-left text-sm font-semibold text-foreground px-4 py-3">Sản phẩm</th>
+							  <th className="text-right text-sm font-semibold text-foreground px-4 py-3">Đơn giá</th>
+							  <th className="text-center text-sm font-semibold text-foreground px-4 py-3 w-40">Số lượng</th>
+							  <th className="text-right text-sm font-semibold text-foreground px-4 py-3">Thành tiền</th>
+							  <th className="text-center w-12"></th> {/* Cột xóa */}
+							</tr>
+						  </thead>
+						  <tbody>
+							{orderItems.map((item) => (
+							  <tr key={item.id} className="border-t border-border/50">
+								<td className="px-4 py-3 text-foreground">
+								  <div className="font-medium">{item.name}</div>
+								  {item.description && (
+									<div className="text-xs text-muted-foreground mt-1">{item.description}</div>
+								  )}
+								</td>
+								<td className="text-right px-4 py-3 text-foreground">
+								  {formatVND(item.price)} VND
+								</td>
+								<td className="px-4 py-3">
+								  <div className="flex items-center justify-center gap-2">
+									<Button
+									  size="icon"
+									  variant="outline"
+									  className="h-8 w-8"
+									  onClick={() => updateQuantity(item.id, -1)}
+									>
+									  <Minus className="h-4 w-4" />
+									</Button>
+									<Input
+									  type="number"
+									  min="1"
+									  value={item.quantity}
+									  onChange={(e) => {
+										const newQty = parseInt(e.target.value) || 1
+										setOrderItems(orderItems.map(i => 
+										  i.id === item.id 
+											? { ...i, quantity: newQty, total: i.price * newQty }
+											: i
+										))
+									  }}
+									  className="w-20 text-center"
+									/>
+									<Button
+									  size="icon"
+									  variant="outline"
+									  className="h-8 w-8"
+									  onClick={() => updateQuantity(item.id, 1)}
+									>
+									  <Plus className="h-4 w-4" />
+									</Button>
+								  </div>
+								</td>
+								<td className="text-right px-4 py-3 font-semibold text-foreground">
+								  {formatVND(item.total)} VND
+								</td>
+								<td className="text-center px-2">
+								  <Button
+									size="icon"
+									variant="ghost"
+									className="h-8 w-8 text-destructive hover:bg-destructive/10"
+									onClick={() => {
+									  setOrderItems(orderItems.filter(i => i.id !== item.id))
+									}}
+								  >
+									<Trash2 className="h-4 w-4" />
+								  </Button>
+								</td>
+							  </tr>
+							))}
+						  </tbody>
+						  <tfoot className="bg-muted/30 font-semibold">
+							<tr>
+							  <td colSpan={3} className="text-right px-4 py-4">
+								Tổng cộng
+							  </td>
+							  <td className="text-right px-4 py-4 text-xl text-foreground">
+								{formatVND(calculateTotal())} VND
+							  </td>
+							  <td></td>
+							</tr>
+						  </tfoot>
+						</table>
+					  </div>
+					</>
+				  )}
+				</Card>
             </div>
 
             {/* Review Button */}
@@ -600,72 +677,77 @@ function ReviewOrderPage({
               <p className="text-foreground font-medium">{orderHeader.orderNumber}</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Order Date</label>
+              <label className="text-sm font-medium text-muted-foreground block mb-1">Ngày Đặt Hàng</label>
               <p className="text-foreground font-medium">{orderHeader.orderDate}</p>
             </div>
 
             <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Customer Name</label>
+              <label className="text-sm font-medium text-muted-foreground block mb-1">Tên Khách Hàng</label>
               <p className="text-foreground font-medium">{orderHeader.customerName || "-"}</p>
             </div>
 
             <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Customer Address</label>
+              <label className="text-sm font-medium text-muted-foreground block mb-1">Địa Chỉ Khách Hàng</label>
               <p className="text-foreground font-medium">{orderHeader.customerAddress || "-"}</p>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Customer Phone</label>
+              <label className="text-sm font-medium text-muted-foreground block mb-1">Số Điện Thoại Đặt Hàng</label>
               <p className="text-foreground font-medium">{orderHeader.customerPhone || "-"}</p>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Customer Email</label>
+              <label className="text-sm font-medium text-muted-foreground block mb-1">Email Khách Hàng</label>
               <p className="text-foreground font-medium">{orderHeader.customerEmail || "-"}</p>
             </div>
 
             <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Ship to Address</label>
+              <label className="text-sm font-medium text-muted-foreground block mb-1">Địa Chỉ Giao Hàng</label>
               <p className="text-foreground font-medium">{orderHeader.shipToAddress || "-"}</p>
             </div>
 
             <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Billing to Name</label>
+              <label className="text-sm font-medium text-muted-foreground block mb-1">Tên Xuất Hóa Đơn</label>
               <p className="text-foreground font-medium">{orderHeader.billingToName || "-"}</p>
             </div>
 
             <div className="lg:col-span-2">
-              <label className="text-sm font-medium text-muted-foreground block mb-1">Billing to Address</label>
+              <label className="text-sm font-medium text-muted-foreground block mb-1">Địa Chỉ Xuất Hóa Đơn</label>
               <p className="text-foreground font-medium">{orderHeader.billingToAddress || "-"}</p>
             </div>
 
             <div className="lg:col-span-2">
               <label className="text-sm font-medium text-muted-foreground block mb-1">
-                Billing To Tax Registration Number
+                Mã Số Thuế
               </label>
               <p className="text-foreground font-medium">{orderHeader.billingToTaxReg || "-"}</p>
             </div>
+			
+			<div className="lg:col-span-2">
+              <label className="text-sm font-medium text-muted-foreground block mb-1">⚠️ LƯU Ý: ĐƠN GIÁ NÀY CÓ THỂ CHƯA BAO GỒM THUẾ</label>
+            </div>
+			
           </div>
         </Card>
 
         <Card className="p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Order Detail</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4">Chi Tiết Đơn Hàng</h2>
 
           <div className="border border-border rounded-md overflow-hidden">
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
                   <th className="text-left text-sm font-semibold text-foreground px-4 py-3 border-b border-border">
-                    Product
+                    Sản Phẩm
                   </th>
                   <th className="text-right text-sm font-semibold text-foreground px-4 py-3 border-b border-border">
-                    Price
+                    Đơn Giá
                   </th>
                   <th className="text-center text-sm font-semibold text-foreground px-4 py-3 border-b border-border">
-                    Quantity
+                    Số Lượng
                   </th>
                   <th className="text-right text-sm font-semibold text-foreground px-4 py-3 border-b border-border">
-                    Total
+                    Thanh Tiền
                   </th>
                 </tr>
               </thead>
