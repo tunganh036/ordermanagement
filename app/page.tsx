@@ -150,14 +150,8 @@ export default function OrderEntryPage() {
         throw new Error(result.details || result.error || "Failed to submit order")
       }
 
-      // Close confirmation and navigate back to order page first
       setShowConfirmation(false)
-      setShowReview(false)
-
-      // Then show success modal
-      setTimeout(() => {
-        setShowSuccessModal(true)
-      }, 100)
+      setShowSuccessModal(true)
     } catch (error) {
       console.error("[v0] Error submitting order:", error)
       setShowConfirmation(false)
