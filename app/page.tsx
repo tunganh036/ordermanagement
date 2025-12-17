@@ -619,7 +619,7 @@ export default function OrderEntryPage() {
 							  <td colSpan={3} className="text-right px-4 py-4">
 								Tổng cộng
 							  </td>
-							  <td className="text-right px-4 py-4 text-xl text-foreground">
+							  <td className="text-right px-3 py-3 text-xl text-foreground">
 								{formatVND(calculateTotal())} VND
 							  </td>
 							  <td></td>
@@ -667,7 +667,7 @@ function ReviewOrderPage({
 
   const formatVND = (amount: number) => {
     return amount.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
+      minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     })
   }
