@@ -358,8 +358,7 @@ export default function OrderEntryPage() {
 					<Input value={customerName} onChange={(e) => setCustomerName(e.target.value)
 																				if (!billingToName) {
 																				  setBillingToName(e.target.value)
-																				}
-														 } 
+																				}} 
 					/>
 				  </div>
 
