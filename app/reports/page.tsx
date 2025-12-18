@@ -88,15 +88,24 @@ useEffect(() => {
   // Tổng hợp theo sản phẩm
   const aggregateByProduct = () => {
     const map = new Map<number, { name: string; qty: number; total: number }>()
-    orders.forEach(o => o.items.forEach(i => {
-      if (map.has(i.id)) {
-        const e = map.get(i.id)!
-        e.qty += i.quantity
-        e.total += i.total
-      } else {
-        map.set(i.id, { name: i.productName, qty: i.quantity, total: i.total })
-      }
-    }))
+    orders.forEach(o => {
+      // o.order_items là mảng từ join Supabase
+      (o.order_items || []).forEach((i: any) => {
+        const productId = i.product_id
+        const productName = i.product_name || "Không xác định"  // ← Dùng product_name đúng tên cột
+        if (map.has(productId)) {
+          const e = map.get(productId)!
+          e.qty += i.quantity
+          e.total += i.total
+        } else {
+          map.set(productId, {
+            name: productName,
+            qty: i.quantity,
+            total: i.total
+          })
+        }
+      })
+    })
     return Array.from(map.values())
   }
 
@@ -106,6 +115,8 @@ useEffect(() => {
     orders.forEach(o => {
       o.items.forEach(i => {
         const key = `${o.customer_phone}-${i.id}`
+        const productId = i.product_id
+        const productName = i.product_name || "Không xác định"  // ← Dùng product_name đúng tên cột
         if (map.has(key)) {
           const e = map.get(key)!
           e.qty += i.quantity
@@ -114,7 +125,7 @@ useEffect(() => {
           map.set(key, {
             phone: o.customer_phone,
             customerName: o.customer_name || "Không xác định",  // ← Thêm tên khách hàng
-            name: i.productName,
+            name: productName,
             qty: i.quantity,
             total: i.total
           })
