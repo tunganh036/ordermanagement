@@ -77,10 +77,16 @@ useEffect(() => {
             </TableHeader>
             <TableBody>
               {filtered.map(o => (
-                <TableRow key={o.orderNumber}>
-                  <TableCell className="font-medium">{o.orderNumber}</TableCell>
-                  <TableCell>{o.orderDate}</TableCell>
-                  <TableCell>{o.customerPhone}</TableCell>
+                <TableRow key={o.id || o.order_number}>
+                  <TableCell className="font-medium">
+                    {o.order_number || "-"}  {/* ← Đúng tên cột */}
+                  </TableCell>
+                  <TableCell>
+                    {o.order_date || "-"}    {/* ← Đúng tên cột */}
+                  </TableCell>
+                  <TableCell>
+                    {o.customer_phone || "-"}  {/* ← Đúng tên cột */}
+                  </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded text-sm font-medium
                       ${o.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
@@ -90,10 +96,12 @@ useEffect(() => {
                       {o.status === 'PENDING' ? 'Chờ xử lý' :
                        o.status === 'RECEIVED' ? 'Đã nhận' :
                        o.status === 'ORDERED' ? 'Đã đặt NCC' :
-                       o.status === 'DELIVERED' ? 'Đã giao' : o.status}
+                       o.status === 'DELIVERED' ? 'Đã giao' : o.status || 'Chờ xử lý'}
                     </span>
                   </TableCell>
-                  <TableCell className="text-right">{formatVND(o.subtotal)}</TableCell>
+                  <TableCell className="text-right">
+                    {formatVND(o.subtotal)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
