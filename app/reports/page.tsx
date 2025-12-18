@@ -32,6 +32,7 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true)
   const [password, setPassword] = useState("")
   const [authenticated, setAuthenticated] = useState(false)
+  const [detailSearch, setDetailSearch] = useState("")
 
   // State cho filter và sort
   const [productSearch, setProductSearch] = useState("")
@@ -47,7 +48,7 @@ export default function ReportsPage() {
   // Simple password check (thay 'anhnt123' bằng pass thật)
   useEffect(() => {
     const stored = localStorage.getItem('reportPass')
-    if (stored === 'anhnt123') {
+    if (stored === 'Tunganh@123') {
       setAuthenticated(true)
       fetchOrders()
     }
