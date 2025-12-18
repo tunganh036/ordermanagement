@@ -6,29 +6,28 @@ export async function POST(request: Request) {
     const body = await request.json()
     const supabase = await createClient()
 
-    // Trường hợp batch update từ CSV hoặc batch select
+    let updates = []
+
+    // Xử lý cả 2 format
     if (body.batchUpdates) {
-      const updates = body.batchUpdates
-      const { error } = await supabase
-        .from("orders")
-        .upsert(updates.map((u: any) => ({ id: u.id, status: u.status })))
-
-      if (error) throw error
-      return NextResponse.json({ success: true })
+      updates = body.batchUpdates
+    } else if (body.orderIds && body.status) {
+      updates = body.orderIds.map((id: number) => ({ id, status: body.status }))
+    } else {
+      return NextResponse.json({ error: "Invalid request format" }, { status: 400 })
     }
 
-    // Trường hợp update nhiều đơn từ checkbox
-    if (body.orderIds && body.status) {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status: body.status })
-        .in("id", body.orderIds)
-
-      if (error) throw error
-      return NextResponse.json({ success: true })
+    if (updates.length === 0) {
+      return NextResponse.json({ error: "No updates provided" }, { status: 400 })
     }
 
-    return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+    const { error } = await supabase
+      .from("orders")
+      .upsert(updates.map((u: any) => ({ id: u.id, status: u.status })))
+
+    if (error) throw error
+
+    return NextResponse.json({ success: true })
   } catch (err: any) {
     console.error("Update status error:", err)
     return NextResponse.json({ error: err.message || "Update failed" }, { status: 500 })
