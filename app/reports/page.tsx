@@ -85,18 +85,20 @@ useEffect(() => {
 
   setFilteredOrders(filtered)
 }, [searchTerm, orders, authenticated])
-  // Tổng hợp theo sản phẩm
+// Tổng hợp theo sản phẩm - FIX: dùng chung o.order_items (từ Supabase join)
   const aggregateByProduct = () => {
     const map = new Map<number, { name: string; qty: number; total: number }>()
     orders.forEach(o => {
-      // o.order_items là mảng từ join Supabase
+      // Dùng o.order_items từ Supabase join (không dùng o.items nữa)
       (o.order_items || []).forEach((i: any) => {
         const productId = i.product_id
-        const productName = i.product_name || "Không xác định"  // ← Dùng product_name đúng tên cột
+        const productName = i.product_name || "Không xác định"
+
         if (map.has(productId)) {
           const e = map.get(productId)!
           e.qty += i.quantity
           e.total += i.total
+          // Giữ tên từ lần đầu (giả sử tên giống nhau trong cùng product_id)
         } else {
           map.set(productId, {
             name: productName,
@@ -106,17 +108,19 @@ useEffect(() => {
         }
       })
     })
-    return Array.from(map.values())
+    // Sắp xếp theo tổng tiền giảm dần (đẹp hơn)
+    return Array.from(map.values()).sort((a, b) => b.total - a.total)
   }
 
-  // Tổng hợp theo sản phẩm + SĐT
+  // Tổng hợp theo sản phẩm + SĐT - FIX: dùng o.order_items thay vì o.items
   const aggregateByProductAndPhone = () => {
     const map = new Map<string, { phone: string; customerName: string; name: string; qty: number; total: number }>()
     orders.forEach(o => {
-      o.items.forEach(i => {
-        const key = `${o.customer_phone}-${i.id}`
-        const productId = i.product_id
-        const productName = i.product_name || "Không xác định"  // ← Dùng product_name đúng tên cột
+      // Dùng o.order_items từ Supabase join
+      (o.order_items || []).forEach((i: any) => {
+        const key = `${o.customer_phone}-${i.product_id}`
+        const productName = i.product_name || "Không xác định"
+
         if (map.has(key)) {
           const e = map.get(key)!
           e.qty += i.quantity
@@ -124,7 +128,7 @@ useEffect(() => {
         } else {
           map.set(key, {
             phone: o.customer_phone,
-            customerName: o.customer_name || "Không xác định",  // ← Thêm tên khách hàng
+            customerName: o.customer_name || "Không xác định",
             name: productName,
             qty: i.quantity,
             total: i.total
@@ -132,7 +136,7 @@ useEffect(() => {
         }
       })
     })
-    return Array.from(map.values())
+    return Array.from(map.values()).sort((a, b) => b.total - a.total)
   }
   
   if (!authenticated) {
