@@ -94,7 +94,7 @@ useEffect(() => {
         e.qty += i.quantity
         e.total += i.total
       } else {
-        map.set(i.id, { name: i.name, qty: i.quantity, total: i.total })
+        map.set(i.id, { name: i.productName, qty: i.quantity, total: i.total })
       }
     }))
     return Array.from(map.values())
@@ -114,7 +114,7 @@ useEffect(() => {
           map.set(key, {
             phone: o.customer_phone,
             customerName: o.customer_name || "Không xác định",  // ← Thêm tên khách hàng
-            name: i.name,
+            name: i.productName,
             qty: i.quantity,
             total: i.total
           })
