@@ -243,24 +243,35 @@ export default function ReportsPage() {
 
   // Cập nhật trạng thái
   const updateOrderStatus = async () => {
-    const updates = Object.entries(statusUpdates).map(([id, status]) => ({ id: Number(id), status }))
+    const updates = Object.entries(statusUpdates)
+      .filter(([id, status]) => status && status !== orders.find(o => o.id === Number(id))?.status)  // Chỉ update nếu thay đổi
+      .map(([id, status]) => ({ id: Number(id), status }))
+  
     if (updates.length === 0) {
-      alert("Chưa chọn đơn hàng nào hoặc chưa thay đổi trạng thái")
+      alert("Chưa có thay đổi trạng thái nào!")
       return
     }
+  
+    console.log("[DEBUG] Sending updates:", updates)  // Log để check
+  
     try {
       const res = await fetch("/api/orders/update-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates)
+        body: JSON.stringify({ batchUpdates: updates })  // ← Thống nhất dùng batchUpdates cho cả 2 trường hợp
       })
-      if (!res.ok) throw new Error("Update failed")
+  
+      if (!res.ok) {
+        const errorText = await res.text()
+        throw new Error(`Update failed: ${res.status} ${errorText}`)
+      }
+  
       fetchOrders()
       setStatusUpdates({})
       alert("Cập nhật thành công!")
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      alert("Cập nhật thất bại!")
+      alert(err.message || "Cập nhật thất bại!")
     }
   }
 
