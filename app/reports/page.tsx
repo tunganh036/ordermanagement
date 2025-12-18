@@ -55,7 +55,7 @@ export default function ReportsPage() {
   }, [])
 
   const handleLogin = () => {
-    if (password === 'anhnt123') {
+    if (password === 'Tunganh@123') {
       localStorage.setItem('reportPass', password)
       setAuthenticated(true)
       fetchOrders()
