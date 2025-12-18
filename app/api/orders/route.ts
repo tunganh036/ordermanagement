@@ -2,19 +2,52 @@ import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 
 export async function GET() {
-  const orders = await db.orders.findMany({ include: { items: true } }) // Lấy all orders với items
-  return NextResponse.json(orders)
+  try {
+    const supabase = await createClient()
+
+    // Lấy tất cả orders cùng với items (join qua order_items)
+    const { data: orders, error } = await supabase
+      .from("orders")
+      .select(`
+        *,
+        order_items (
+          product_id,
+          product_name,
+          quantity,
+          unit_price,
+          total
+        )
+      `)
+      .order("created_at", { ascending: false }) // Sắp xếp mới nhất trước
+
+    if (error) {
+      console.error("[v0] GET orders error:", error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Định dạng lại items cho dễ dùng ở frontend
+    const formattedOrders = orders.map((order: any) => ({
+      ...order,
+      items: order.order_items || [],
+      // Xóa trường order_items thừa
+      order_items: undefined,
+    }))
+
+    return NextResponse.json(formattedOrders)
+  } catch (err: any) {
+    console.error("[v0] GET orders unexpected error:", err)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }
 
 export async function POST(request: Request) {
   try {
     const orderData = await request.json()
-
     console.log("[v0] Received order data:", JSON.stringify(orderData, null, 2))
 
     const supabase = await createClient()
 
-    // Insert order header
+    // Insert order header - tự động thêm status 'PENDING' nếu chưa có
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
@@ -29,6 +62,7 @@ export async function POST(request: Request) {
         billing_address: orderData.billingAddress,
         billing_tax_number: orderData.billingTaxNumber,
         subtotal: orderData.subtotal,
+        status: orderData.status || "PENDING", // ← QUAN TRỌNG: mặc định PENDING
       })
       .select()
       .single()
@@ -61,7 +95,8 @@ export async function POST(request: Request) {
 
     console.log("[v0] Order items inserted successfully")
 
-    await sendSlackNotification(orderData)
+    // Gửi Slack notification (giữ nguyên)
+    await sendSlackNotification({ ...orderData, id: order.id })
 
     return NextResponse.json({
       success: true,
@@ -75,14 +110,14 @@ export async function POST(request: Request) {
         details: error.message || "Unknown error",
         code: error.code || null,
       },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }
 
+// Giữ nguyên hàm sendSlackNotification của anh
 async function sendSlackNotification(orderData: any) {
   const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL
-
   if (!slackWebhookUrl) {
     console.warn("Slack webhook URL not configured")
     return
@@ -116,30 +151,12 @@ async function sendSlackNotification(orderData: any) {
       {
         type: "section",
         fields: [
-          {
-            type: "mrkdwn",
-            text: `*Customer:*\n${orderData.customerName}`,
-          },
-          {
-            type: "mrkdwn",
-            text: `*Phone:*\n${orderData.customerPhone}`,
-          },
-          {
-            type: "mrkdwn",
-            text: `*Email:*\n${orderData.customerEmail}`,
-          },
-          {
-            type: "mrkdwn",
-            text: `*Ship To:*\n${orderData.shipToAddress}`,
-          },
-          {
-            type: "mrkdwn",
-            text: `*Tax Number:*\n${orderData.billingTaxNumber}`,
-          },
-          {
-            type: "mrkdwn",
-            text: `*Total:*\n${formattedSubtotal} VND`,
-          },
+          { type: "mrkdwn", text: `*Customer:*\n${orderData.customerName}` },
+          { type: "mrkdwn", text: `*Phone:*\n${orderData.customerPhone}` },
+          { type: "mrkdwn", text: `*Email:*\n${orderData.customerEmail}` },
+          { type: "mrkdwn", text: `*Ship To:*\n${orderData.shipToAddress}` },
+          { type: "mrkdwn", text: `*Tax Number:*\n${orderData.billingTaxNumber || "N/A"}` },
+          { type: "mrkdwn", text: `*Total:*\n${formattedSubtotal} VND` },
         ],
       },
       {
