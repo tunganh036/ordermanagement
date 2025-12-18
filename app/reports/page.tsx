@@ -85,11 +85,11 @@ useEffect(() => {
 
   setFilteredOrders(filtered)
 }, [searchTerm, orders, authenticated])
-// Tổng hợp theo sản phẩm - FIX: dùng chung o.order_items (từ Supabase join)
+  
+  // Tổng hợp theo sản phẩm - dùng o.order_items
   const aggregateByProduct = () => {
     const map = new Map<number, { name: string; qty: number; total: number }>()
     orders.forEach(o => {
-      // Dùng o.order_items từ Supabase join (không dùng o.items nữa)
       (o.order_items || []).forEach((i: any) => {
         const productId = i.product_id
         const productName = i.product_name || "Không xác định"
@@ -98,7 +98,6 @@ useEffect(() => {
           const e = map.get(productId)!
           e.qty += i.quantity
           e.total += i.total
-          // Giữ tên từ lần đầu (giả sử tên giống nhau trong cùng product_id)
         } else {
           map.set(productId, {
             name: productName,
@@ -108,16 +107,14 @@ useEffect(() => {
         }
       })
     })
-    // Sắp xếp theo tổng tiền giảm dần (đẹp hơn)
     return Array.from(map.values()).sort((a, b) => b.total - a.total)
   }
 
-  // Tổng hợp theo sản phẩm + SĐT - FIX: dùng o.order_items thay vì o.items
+  // Tổng hợp theo sản phẩm + SĐT - sửa dùng o.order_items thay vì o.items
   const aggregateByProductAndPhone = () => {
     const map = new Map<string, { phone: string; customerName: string; name: string; qty: number; total: number }>()
     orders.forEach(o => {
-      // Dùng o.order_items từ Supabase join
-      (o.order_items || []).forEach((i: any) => {
+      (o.order_items || []).forEach((i: any) => {  // ← Sửa từ o.items thành o.order_items
         const key = `${o.customer_phone}-${i.product_id}`
         const productName = i.product_name || "Không xác định"
 
