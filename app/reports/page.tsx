@@ -53,6 +53,7 @@ export default function ReportsPage() {
     try {
       const res = await fetch('/api/orders')
       const data = await res.json()
+      console.log("[DEBUG Frontend] Data from API:", JSON.stringify(data, null, 2))  // ← Thêm dòng này
       setOrders(data)
       setFilteredOrders(data)
       setLoading(false)
