@@ -54,7 +54,6 @@ export default function ReportsPage() {
 
   // State cho tab Cập Nhật Trạng Thái
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
-  const [batchStatus, setBatchStatus] = useState<string>("")
   const [statusUpdates, setStatusUpdates] = useState<{ [id: number]: string }>({})
 
   // Password mới
@@ -81,7 +80,8 @@ export default function ReportsPage() {
       const res = await fetch("/api/orders")
       const data = await res.json()
       setOrders(data)
-      setFilteredOrders(data)
+      // Sort mặc định descending theo mã đơn cho tab Tổng Hợp Đơn Hàng
+      setFilteredOrders(data.sort((a: Order, b: Order) => b.order_number.localeCompare(a.order_number)))
       setLoading(false)
     } catch (err) {
       console.error(err)
@@ -89,11 +89,11 @@ export default function ReportsPage() {
     }
   }
 
-  // Filter cho tab Tổng Hợp Đơn Hàng
+  // Filter + Sort cho tab Tổng Hợp Đơn Hàng
   useEffect(() => {
     if (!authenticated) return
     const lower = searchTerm.toLowerCase()
-    const filtered = orders.filter(o => {
+    let filtered = orders.filter(o => {
       const orderNumber = (o.order_number || "").toLowerCase()
       const customerPhone = (o.customer_phone || "").toLowerCase()
       const customerEmail = (o.customer_email || "").toLowerCase()
@@ -107,6 +107,8 @@ export default function ReportsPage() {
         customerName.includes(lower)
       )
     })
+    // Sort descending theo mã đơn (mặc định)
+    filtered = filtered.sort((a, b) => b.order_number.localeCompare(a.order_number))
     setFilteredOrders(filtered)
   }, [searchTerm, orders, authenticated])
 
@@ -244,28 +246,26 @@ export default function ReportsPage() {
   // Cập nhật trạng thái
   const updateOrderStatus = async () => {
     const updates = Object.entries(statusUpdates)
-      .filter(([id, status]) => status && status !== orders.find(o => o.id === Number(id))?.status)  // Chỉ update nếu thay đổi
+      .filter(([id, status]) => status && status !== orders.find(o => o.id === Number(id))?.status)
       .map(([id, status]) => ({ id: Number(id), status }))
-  
+
     if (updates.length === 0) {
       alert("Chưa có thay đổi trạng thái nào!")
       return
     }
-  
-    console.log("[DEBUG] Sending updates:", updates)  // Log để check
-  
+
     try {
       const res = await fetch("/api/orders/update-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ batchUpdates: updates })  // ← Thống nhất dùng batchUpdates cho cả 2 trường hợp
+        body: JSON.stringify({ batchUpdates: updates })
       })
-  
+
       if (!res.ok) {
         const errorText = await res.text()
         throw new Error(`Update failed: ${res.status} ${errorText}`)
       }
-  
+
       fetchOrders()
       setStatusUpdates({})
       alert("Cập nhật thành công!")
@@ -306,7 +306,7 @@ export default function ReportsPage() {
           const res = await fetch("/api/orders/update-status", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updates)
+            body: JSON.stringify({ batchUpdates: updates })
           })
           if (!res.ok) throw new Error("Upload failed")
           fetchOrders()
@@ -345,7 +345,7 @@ export default function ReportsPage() {
           <TabsTrigger value="order-details">Chi Tiết Đơn Hàng</TabsTrigger>
         </TabsList>
 
-        {/* Tab Chi Tiết Đơn Hàng (Tổng Hợp Đơn Hàng) */}
+        {/* Tab Tổng Hợp Đơn Hàng */}
         <TabsContent value="detail">
           <Card className="p-4">
             <div className="flex gap-2 mb-4">
@@ -381,7 +381,7 @@ export default function ReportsPage() {
           </Card>
         </TabsContent>
 
-        {/* Tab Tổng Hợp Theo Sản Phẩm */}
+        {/* Tab Theo Sản Phẩm */}
         <TabsContent value="by-product">
           <Card className="p-4">
             <div className="flex gap-2 mb-4">
@@ -391,9 +391,24 @@ export default function ReportsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Sản Phẩm</TableHead>
-                  <TableHead className="text-right">Tổng SL</TableHead>
-                  <TableHead className="text-right">Tổng Tiền</TableHead>
+                  <TableHead>
+                    Sản Phẩm
+                    <Button variant="ghost" size="sm" onClick={() => setProductSort(prev => ({ ...prev, field: "name", desc: !prev.desc }))}>
+                      <ArrowUpDown className="h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead className="text-right">
+                    Tổng SL
+                    <Button variant="ghost" size="sm" onClick={() => setProductSort(prev => ({ ...prev, field: "qty", desc: !prev.desc }))}>
+                      <ArrowUpDown className="h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead Medicaid className="text-right">
+                    Tổng Tiền
+                    <Button variant="ghost" size="sm" onClick={() => setProductSort(prev => ({ ...prev, field: "total", desc: !prev.desc }))}>
+                      <ArrowUpDown className="h-4 w-4" />
+                    </Button>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -419,11 +434,31 @@ export default function ReportsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>SĐT</TableHead>
+                  <TableHead>
+                    SĐT
+                    <Button variant="ghost" size="sm" onClick={() => setPhoneProductSort(prev => ({ ...prev, field: "phone", desc: !prev.desc }))}>
+                      <ArrowUpDown className="h-4 w-4" />
+                    </Button>
+                  </TableHead>
                   <TableHead>Tên Khách Hàng</TableHead>
-                  <TableHead>Sản Phẩm</TableHead>
-                  <TableHead className="text-right">SL</TableHead>
-                  <TableHead className="text-right">Tổng Tiền</TableHead>
+                  <TableHead>
+                    Sản Phẩm
+                    <Button variant="ghost" size="sm" onClick={() => setPhoneProductSort(prev => ({ ...prev, field: "name", desc: !prev.desc }))}>
+                      <ArrowUpDown className="h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead className="text-right">
+                    SL
+                    <Button variant="ghost" size="sm" onClick={() => setPhoneProductSort(prev => ({ ...prev, field: "qty", desc: !prev.desc }))}>
+                      <ArrowUpDown className="h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                  <TableHead className="text-right">
+                    Tổng Tiền
+                    <Button variant="ghost" size="sm" onClick={() => setPhoneProductSort(prev => ({ ...prev, field: "total", desc: !prev.desc }))}>
+                      <ArrowUpDown className="h-4 w-4" />
+                    </Button>
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -515,7 +550,7 @@ export default function ReportsPage() {
           </Card>
         </TabsContent>
 
-        {/* Tab Chi Tiết Đơn Hàng Join */}
+        {/* Tab Chi Tiết Đơn Hàng */}
         <TabsContent value="order-details">
           <Card className="p-4">
             <div className="flex gap-2 mb-4">
@@ -527,19 +562,19 @@ export default function ReportsPage() {
                 <TableRow>
                   <TableHead>
                     Số Đơn Hàng
-                    <Button variant="ghost" size="sm" onClick={() => setOrderDetailSort(prev => ({ ...prev, desc: !prev.desc }))}>
+                    <Button variant="ghost" size="sm" onClick={() => setOrderDetailSort(prev => ({ ...prev, field: "order_number", desc: !prev.desc }))}>
                       <ArrowUpDown className="h-4 w-4" />
                     </Button>
                   </TableHead>
                   <TableHead>
                     Ngày Đặt Hàng
-                    <Button variant="ghost" size="sm" onClick={() => setOrderDetailSort({ field: "order_date", desc: !orderDetailSort.desc })}>
+                    <Button variant="ghost" size="sm" onClick={() => setOrderDetailSort(prev => ({ ...prev, field: "order_date", desc: !prev.desc }))}>
                       <ArrowUpDown className="h-4 w-4" />
                     </Button>
                   </TableHead>
                   <TableHead>
                     SĐT
-                    <Button variant="ghost" size="sm" onClick={() => setOrderDetailSort({ field: "customer_phone", desc: !orderDetailSort.desc })}>
+                    <Button variant="ghost" size="sm" onClick={() => setOrderDetailSort(prev => ({ ...prev, field: "customer_phone", desc: !prev.desc }))}>
                       <ArrowUpDown className="h-4 w-4" />
                     </Button>
                   </TableHead>
