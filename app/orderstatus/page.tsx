@@ -9,9 +9,9 @@ import { Search } from "lucide-react"
 import { formatVND } from "@/lib/formatVND"
 
 type Order = {
-  orderNumber: string
-  orderDate: string
-  customerPhone: string
+  order_number: string
+  order_date: string
+  customer_phone: string
   status: string
   subtotal: number
 }
@@ -33,19 +33,17 @@ export default function OrderStatusPage() {
       .catch(() => setLoading(false))
   }, [])
 
-useEffect(() => {
-  const lower = searchTerm.toLowerCase()
-
-  setFiltered(orders.filter(o => {
-    const orderNumber = (o.orderNumber || "").toLowerCase()
-    const customerPhone = o.customerPhone || ""
-
-    return (
-      orderNumber.includes(lower) ||
-      customerPhone.includes(lower)
-    )
-  }))
-}, [searchTerm, orders])
+  useEffect(() => {
+    const lower = searchTerm.toLowerCase()
+    setFiltered(orders.filter(o => {
+      const orderNumber = (o.order_number || "").toLowerCase()
+      const customerPhone = (o.customer_phone || "").toLowerCase()
+      return (
+        orderNumber.includes(lower) ||
+        customerPhone.includes(lower)
+      )
+    }))
+  }, [searchTerm, orders])
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -57,48 +55,57 @@ useEffect(() => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <Button variant="outline"><Search className="h-4 w-4" /></Button>
+          <Button variant="outline">
+            <Search className="h-4 w-4" />
+          </Button>
         </div>
 
-    {loading ? (
-      <p className="text-center py-10">Đang tải...</p>
-    ) : filtered.length === 0 || searchTerm.trim() === "" ? (  // ← Thêm kiểm tra searchTerm rỗng
-      <p className="text-center py-10 text-muted-foreground">
-        {searchTerm.trim() === "" ? "Vui lòng nhập mã đơn hoặc SĐT để tra cứu." : "Không tìm thấy đơn hàng nào."}
-      </p>
-    ) : (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Mã Đơn Hàng</TableHead>
-            <TableHead>Ngày Đặt</TableHead>
-            <TableHead>Số Điện Thoại</TableHead>
-            <TableHead>Tình Trạng</TableHead>
-            <TableHead className="text-right">Tổng Tiền</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filtered.map(o => (
-            <TableRow key={o.order_number}>
-              <TableCell className="font-medium">{o.order_number || "-"}</TableCell>
-              <TableCell>{o.order_date || "-"}</TableCell>
-              <TableCell>{o.customer_phone || "-"}</TableCell>
-              <TableCell>
-                <span className={`px-2 py-1 rounded text-sm font-medium
-                  ${o.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                    o.status === 'ORDERED' ? 'bg-blue-100 text-blue-800' :
-                    o.status === 'RECEIVED' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-gray-100 text-gray-800'}`}>
-                  {o.status === 'PENDING' ? 'Chờ xử lý' :
-                   o.status === 'RECEIVED' ? 'Đã nhận' :
-                   o.status === 'ORDERED' ? 'Đã đặt NCC' :
-                   o.status === 'DELIVERED' ? 'Đã giao' : o.status || 'Chờ xử lý'}
-                </span>
-              </TableCell>
-              <TableCell className="text-right">{formatVND(o.subtotal)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    )}
+        {loading ? (
+          <p className="text-center py-10">Đang tải...</p>
+        ) : searchTerm.trim() === "" ? (
+          <p className="text-center py-10 text-muted-foreground">
+            Vui lòng nhập mã đơn hoặc số điện thoại để tra cứu.
+          </p>
+        ) : filtered.length === 0 ? (
+          <p className="text-center py-10 text-muted-foreground">
+            Không tìm thấy đơn hàng nào.
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Mã Đơn Hàng</TableHead>
+                <TableHead>Ngày Đặt</TableHead>
+                <TableHead>Số Điện Thoại</TableHead>
+                <TableHead>Tình Trạng</TableHead>
+                <TableHead className="text-right">Tổng Tiền</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map(o => (
+                <TableRow key={o.order_number}>
+                  <TableCell className="font-medium">{o.order_number || "-"}</TableCell>
+                  <TableCell>{o.order_date || "-"}</TableCell>
+                  <TableCell>{o.customer_phone || "-"}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded text-sm font-medium
+                      ${o.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
+                        o.status === 'ORDERED' ? 'bg-blue-100 text-blue-800' :
+                        o.status === 'RECEIVED' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'}`}>
+                      {o.status === 'PENDING' ? 'Chờ xử lý' :
+                       o.status === 'RECEIVED' ? 'Đã nhận' :
+                       o.status === 'ORDERED' ? 'Đã đặt NCC' :
+                       o.status === 'DELIVERED' ? 'Đã giao' : o.status || 'Chờ xử lý'}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">{formatVND(o.subtotal)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Card>
+    </div>
+  )
 }
