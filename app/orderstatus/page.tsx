@@ -33,13 +33,19 @@ export default function OrderStatusPage() {
       .catch(() => setLoading(false))
   }, [])
 
-  useEffect(() => {
-    const lower = searchTerm.toLowerCase()
-    setFiltered(orders.filter(o =>
-      o.orderNumber.toLowerCase().includes(lower) ||
-      o.customerPhone.includes(lower)
-    ))
-  }, [searchTerm, orders])
+useEffect(() => {
+  const lower = searchTerm.toLowerCase()
+
+  setFiltered(orders.filter(o => {
+    const orderNumber = (o.orderNumber || "").toLowerCase()
+    const customerPhone = o.customerPhone || ""
+
+    return (
+      orderNumber.includes(lower) ||
+      customerPhone.includes(lower)
+    )
+  }))
+}, [searchTerm, orders])
 
   return (
     <div className="min-h-screen bg-background p-6">
