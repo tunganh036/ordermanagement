@@ -326,12 +326,12 @@ export default function ReportsPage() {
       <h1 className="text-3xl font-bold mb-6">Báo Cáo Đơn Hàng (Admin)</h1>
 
       <Tabs defaultValue="detail">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsList className="flex flex-wrap gap-2 justify-start mb-6 h-auto">
           <TabsTrigger value="detail">Tổng Hợp Đơn Hàng</TabsTrigger>
-          <TabsTrigger value="by-product">Tổng Hợp Theo Sản Phẩm</TabsTrigger>
+          <TabsTrigger value="by-product">Theo Sản Phẩm</TabsTrigger>
           <TabsTrigger value="by-phone-product">Theo SĐT & Sản Phẩm</TabsTrigger>
           <TabsTrigger value="update-status">Cập Nhật Trạng Thái</TabsTrigger>
-          <TabsTrigger value="order-details">Chi Tiết Đơn Hàng Join</TabsTrigger>
+          <TabsTrigger value="order-details">Chi Tiết Đơn Hàng</TabsTrigger>
         </TabsList>
 
         {/* Tab Chi Tiết Đơn Hàng (Tổng Hợp Đơn Hàng) */}
