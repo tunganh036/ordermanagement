@@ -5,11 +5,18 @@ export async function GET() {
   try {
     const supabase = await createClient()
 
-    // Lấy tất cả orders cùng với items (join qua order_items)
     const { data: orders, error } = await supabase
       .from("orders")
       .select(`
-        *,
+        id,
+        order_number,
+        order_date,
+        customer_name,
+        customer_phone,
+        customer_email,
+        billing_tax_number,
+        subtotal,
+        status,
         order_items (
           product_id,
           product_name,
@@ -18,22 +25,23 @@ export async function GET() {
           total
         )
       `)
-      .order("created_at", { ascending: false }) // Sắp xếp mới nhất trước
+      .order("created_at", { ascending: false })
 
     if (error) {
       console.error("[v0] GET orders error:", error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Định dạng lại items cho dễ dùng ở frontend
-    const formattedOrders = orders.map((order: any) => ({
-      ...order,
-      items: order.order_items || [],
-      // Xóa trường order_items thừa
-      order_items: undefined,
+    // Log để anh check data trả về (xem trong Vercel logs)
+    console.log("[DEBUG] Orders from Supabase:", JSON.stringify(orders, null, 2))
+
+    // Format lại để frontend dùng o.order_items
+    const formatted = orders.map(o => ({
+      ...o,
+      order_items: o.order_items || []
     }))
 
-    return NextResponse.json(formattedOrders)
+    return NextResponse.json(formatted)
   } catch (err: any) {
     console.error("[v0] GET orders unexpected error:", err)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
