@@ -25,6 +25,17 @@ type Order = {
   status: string
 }
 
+type OrderDetail = {
+  order_number: string
+  order_date: string
+  customer_name: string
+  customer_phone: string
+  product_name: string
+  quantity: number
+  total: number
+  status: string
+}
+
 export default function ReportsPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([])
@@ -33,6 +44,7 @@ export default function ReportsPage() {
   const [password, setPassword] = useState("")
   const [authenticated, setAuthenticated] = useState(false)
   const [detailSearch, setDetailSearch] = useState("")
+  const [orderDetailSort, setOrderDetailSort] = useState<{ field: 'customer_phone' | 'order_number' | 'order_date'; desc: boolean }>({ field: 'order_number', desc: true })
 
   // State cho filter và sort
   const [productSearch, setProductSearch] = useState("")
@@ -96,7 +108,53 @@ export default function ReportsPage() {
     })
     setFilteredOrders(filtered)
   }, [searchTerm, orders, authenticated])
+  
+    // Report mới: Chi tiết join header + line
+  const getOrderDetails = () => {
+    let details: OrderDetail[] = []
+    orders.forEach(o => {
+      (o.order_items || []).forEach(i => {
+        details.push({
+          order_number: o.order_number,
+          order_date: o.order_date,
+          customer_name: o.customer_name,
+          customer_phone: o.customer_phone,
+          product_name: i.product_name,
+          quantity: i.quantity,
+          total: i.total,
+          status: o.status
+        })
+      })
+    })
 
+    // Filter theo SĐT, số đơn hàng
+    if (detailSearch) {
+      const lower = detailSearch.toLowerCase()
+      details = details.filter(d =>
+        (d.order_number || "").toLowerCase().includes(lower) ||
+        (d.customer_phone || "").toLowerCase().includes(lower)
+      )
+    }
+
+    // Sort theo state
+    details.sort((a, b) => {
+      if (orderDetailSort.field === 'customer_phone') {
+        const compare = a.customer_phone.localeCompare(b.customer_phone)
+        return orderDetailSort.desc ? -compare : compare
+      }
+      if (orderDetailSort.field === 'order_number') {
+        const compare = a.order_number.localeCompare(b.order_number)
+        return orderDetailSort.desc ? -compare : compare
+      }
+      // Ngày đặt hàng: chuyển sang Date để sort
+      const dateA = new Date(a.order_date).getTime()
+      const dateB = new Date(b.order_date).getTime()
+      return orderDetailSort.desc ? dateB - dateA : dateA - dateB
+    })
+
+    return details
+  }
+  
   // Tổng hợp theo sản phẩm
   const aggregateByProduct = () => {
     const map = new Map<number, { name: string; qty: number; total: number }>()
