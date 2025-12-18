@@ -68,16 +68,18 @@ useEffect(() => {
   const lower = searchTerm.toLowerCase()
 
   const filtered = orders.filter(o => {
-    const orderNumber = (o.orderNumber || "").toLowerCase()
-    const customerPhone = o.customerPhone || ""
-    const customerEmail = (o.customerEmail || "").toLowerCase()
-    const billingToTaxReg = (o.billingToTaxReg || "").toLowerCase()
+    const orderNumber = (o.order_number || "").toLowerCase()
+    const customerPhone = (o.customer_phone || "").toLowerCase()
+    const customerEmail = (o.customer_email || "").toLowerCase()
+    const billingTaxNumber = (o.billing_tax_number || "").toLowerCase()
+    const customerName = (o.customer_name || "").toLowerCase()  // ← thêm để lọc được theo tên khách hàng luôn
 
     return (
       orderNumber.includes(lower) ||
       customerPhone.includes(lower) ||
       customerEmail.includes(lower) ||
-      billingToTaxReg.includes(lower)
+      billingTaxNumber.includes(lower) ||
+      customerName.includes(lower)  // ← lọc thêm theo tên khách hàng
     )
   })
 
@@ -100,20 +102,28 @@ useEffect(() => {
 
   // Tổng hợp theo sản phẩm + SĐT
   const aggregateByProductAndPhone = () => {
-    const map = new Map<string, { phone: string; name: string; qty: number; total: number }>()
-    orders.forEach(o => o.items.forEach(i => {
-      const key = `${o.customerPhone}-${i.id}`
-      if (map.has(key)) {
-        const e = map.get(key)!
-        e.qty += i.quantity
-        e.total += i.total
-      } else {
-        map.set(key, { phone: o.customerPhone, name: i.name, qty: i.quantity, total: i.total })
-      }
-    }))
+    const map = new Map<string, { phone: string; customerName: string; name: string; qty: number; total: number }>()
+    orders.forEach(o => {
+      o.items.forEach(i => {
+        const key = `${o.customer_phone}-${i.id}`
+        if (map.has(key)) {
+          const e = map.get(key)!
+          e.qty += i.quantity
+          e.total += i.total
+        } else {
+          map.set(key, {
+            phone: o.customer_phone,
+            customerName: o.customer_name || "Không xác định",  // ← Thêm tên khách hàng
+            name: i.name,
+            qty: i.quantity,
+            total: i.total
+          })
+        }
+      })
+    })
     return Array.from(map.values())
   }
-
+  
   if (!authenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -165,13 +175,13 @@ useEffect(() => {
               </TableHeader>
               <TableBody>
                 {filteredOrders.map(o => (
-                  <TableRow key={o.id}>
-                    <TableCell>{o.orderNumber}</TableCell>
-                    <TableCell>{o.orderDate}</TableCell>
-                    <TableCell>{o.customerName}</TableCell>
-                    <TableCell>{o.customerPhone}</TableCell>
-                    <TableCell>{o.customerEmail}</TableCell>
-                    <TableCell>{o.billingToTaxReg || "-"}</TableCell>
+                  <TableRow key={o.id || o.order_number}>
+                    <TableCell className="font-medium">{o.order_number || "-"}</TableCell>
+                    <TableCell>{o.order_date || "-"}</TableCell>
+                    <TableCell>{o.customer_name || "-"}</TableCell>   {/* ← Thêm tên khách hàng */}
+                    <TableCell>{o.customer_phone || "-"}</TableCell>
+                    <TableCell>{o.customer_email || "-"}</TableCell>
+                    <TableCell>{o.billing_tax_number || "-"}</TableCell>
                     <TableCell>{formatVND(o.subtotal)}</TableCell>
                   </TableRow>
                 ))}
@@ -209,6 +219,7 @@ useEffect(() => {
               <TableHeader>
                 <TableRow>
                   <TableHead>SĐT</TableHead>
+                  <TableHead>Tên Khách Hàng</TableHead>   {/* ← Thêm cột mới */}
                   <TableHead>Sản Phẩm</TableHead>
                   <TableHead className="text-right">SL</TableHead>
                   <TableHead className="text-right">Tổng Tiền</TableHead>
@@ -218,6 +229,7 @@ useEffect(() => {
                 {aggregateByProductAndPhone().map((a, i) => (
                   <TableRow key={i}>
                     <TableCell>{a.phone}</TableCell>
+                    <TableCell>{a.customerName || "Không xác định"}</TableCell>  {/* ← Lấy tên khách hàng */}
                     <TableCell>{a.name}</TableCell>
                     <TableCell className="text-right">{a.qty}</TableCell>
                     <TableCell className="text-right">{formatVND(a.total)}</TableCell>
