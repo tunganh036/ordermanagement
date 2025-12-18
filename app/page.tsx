@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Search, Plus, Minus, Trash2 } from "lucide-react"
+import { formatVND } from "@/lib/formatVND"
 
 type OrderItem = {
   id: number
@@ -23,12 +24,6 @@ type Product = {
   is_active?: boolean
 }
 
-  const formatVND = (amount: number) => {
-    return amount.toLocaleString("en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    })
-  }
 
 export default function OrderEntryPage() {
   const [orderNumber, setOrderNumber] = useState("")
