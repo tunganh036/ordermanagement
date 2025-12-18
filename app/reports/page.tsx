@@ -62,18 +62,27 @@ export default function ReportsPage() {
     }
   }
 
-  useEffect(() => {
-    if (!authenticated) return
-    const lower = searchTerm.toLowerCase()
-    const filtered = orders.filter(o =>
-      o.orderNumber.toLowerCase().includes(lower) ||
-      o.customerPhone.includes(lower) ||
-      o.customerEmail.toLowerCase().includes(lower) ||
-      o.billingToTaxReg.toLowerCase().includes(lower)
-    )
-    setFilteredOrders(filtered)
-  }, [searchTerm, orders, authenticated])
+useEffect(() => {
+  if (!authenticated) return
 
+  const lower = searchTerm.toLowerCase()
+
+  const filtered = orders.filter(o => {
+    const orderNumber = (o.orderNumber || "").toLowerCase()
+    const customerPhone = o.customerPhone || ""
+    const customerEmail = (o.customerEmail || "").toLowerCase()
+    const billingToTaxReg = (o.billingToTaxReg || "").toLowerCase()
+
+    return (
+      orderNumber.includes(lower) ||
+      customerPhone.includes(lower) ||
+      customerEmail.includes(lower) ||
+      billingToTaxReg.includes(lower)
+    )
+  })
+
+  setFilteredOrders(filtered)
+}, [searchTerm, orders, authenticated])
   // Tổng hợp theo sản phẩm
   const aggregateByProduct = () => {
     const map = new Map<number, { name: string; qty: number; total: number }>()
