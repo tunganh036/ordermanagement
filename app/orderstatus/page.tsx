@@ -60,54 +60,45 @@ useEffect(() => {
           <Button variant="outline"><Search className="h-4 w-4" /></Button>
         </div>
 
-        {loading ? (
-          <p className="text-center py-10">Đang tải...</p>
-        ) : filtered.length === 0 ? (
-          <p className="text-center py-10 text-muted-foreground">Không tìm thấy đơn hàng nào.</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mã Đơn Hàng</TableHead>
-                <TableHead>Ngày Đặt</TableHead>
-                <TableHead>Số Điện Thoại</TableHead>
-                <TableHead>Tình Trạng</TableHead>
-                <TableHead className="text-right">Tổng Tiền</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map(o => (
-                <TableRow key={o.id || o.order_number}>
-                  <TableCell className="font-medium">
-                    {o.order_number || "-"}  {/* ← Đúng tên cột */}
-                  </TableCell>
-                  <TableCell>
-                    {o.order_date || "-"}    {/* ← Đúng tên cột */}
-                  </TableCell>
-                  <TableCell>
-                    {o.customer_phone || "-"}  {/* ← Đúng tên cột */}
-                  </TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded text-sm font-medium
-                      ${o.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                        o.status === 'ORDERED' ? 'bg-blue-100 text-blue-800' :
-                        o.status === 'RECEIVED' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'}`}>
-                      {o.status === 'PENDING' ? 'Chờ xử lý' :
-                       o.status === 'RECEIVED' ? 'Đã nhận' :
-                       o.status === 'ORDERED' ? 'Đã đặt NCC' :
-                       o.status === 'DELIVERED' ? 'Đã giao' : o.status || 'Chờ xử lý'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {formatVND(o.subtotal)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </Card>
-    </div>
-  )
+    {loading ? (
+      <p className="text-center py-10">Đang tải...</p>
+    ) : filtered.length === 0 || searchTerm.trim() === "" ? (  // ← Thêm kiểm tra searchTerm rỗng
+      <p className="text-center py-10 text-muted-foreground">
+        {searchTerm.trim() === "" ? "Vui lòng nhập mã đơn hoặc SĐT để tra cứu." : "Không tìm thấy đơn hàng nào."}
+      </p>
+    ) : (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Mã Đơn Hàng</TableHead>
+            <TableHead>Ngày Đặt</TableHead>
+            <TableHead>Số Điện Thoại</TableHead>
+            <TableHead>Tình Trạng</TableHead>
+            <TableHead className="text-right">Tổng Tiền</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filtered.map(o => (
+            <TableRow key={o.order_number}>
+              <TableCell className="font-medium">{o.order_number || "-"}</TableCell>
+              <TableCell>{o.order_date || "-"}</TableCell>
+              <TableCell>{o.customer_phone || "-"}</TableCell>
+              <TableCell>
+                <span className={`px-2 py-1 rounded text-sm font-medium
+                  ${o.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
+                    o.status === 'ORDERED' ? 'bg-blue-100 text-blue-800' :
+                    o.status === 'RECEIVED' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-gray-100 text-gray-800'}`}>
+                  {o.status === 'PENDING' ? 'Chờ xử lý' :
+                   o.status === 'RECEIVED' ? 'Đã nhận' :
+                   o.status === 'ORDERED' ? 'Đã đặt NCC' :
+                   o.status === 'DELIVERED' ? 'Đã giao' : o.status || 'Chờ xử lý'}
+                </span>
+              </TableCell>
+              <TableCell className="text-right">{formatVND(o.subtotal)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    )}
 }
