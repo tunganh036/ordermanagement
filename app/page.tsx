@@ -627,7 +627,17 @@ export default function OrderEntryPage() {
 				  )}
 				</Card>
             </div>
-
+			{/* Nút Kiểm Tra Tình Trạng - thêm ngay đây */}
+	        <div className="fixed top-4 right-4 z-50">
+	          <Button
+	            onClick={() => window.location.href = "/orderstatus"}
+	            size="lg"
+	            className="shadow-lg bg-primary hover:bg-primary/90"
+	          >
+	            <Search className="mr-2 h-5 w-5" />
+	            Kiểm Tra Tình Trạng Đơn Hàng
+	          </Button>
+	        </div>
             {/* Review Button */}
             {orderItems.length > 0 && (
               <div className="fixed bottom-6 right-6">
