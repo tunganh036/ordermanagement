@@ -1,6 +1,3 @@
-import { NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
-
 export async function POST(request: Request) {
   try {
     const body = await request.json()
@@ -8,7 +5,6 @@ export async function POST(request: Request) {
 
     let updates = []
 
-    // Xử lý cả 2 format
     if (body.batchUpdates) {
       updates = body.batchUpdates
     } else if (body.orderIds && body.status) {
@@ -21,11 +17,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No updates provided" }, { status: 400 })
     }
 
-    const { error } = await supabase
-      .from("orders")
-      .upsert(updates.map((u: any) => ({ id: u.id, status: u.status })))
+    // Dùng UPDATE với eq("id") thay vì upsert
+    for (const update of updates) {
+      const { error } = await supabase
+        .from("orders")
+        .update({ status: update.status })
+        .eq("id", update.id)
 
-    if (error) throw error
+      if (error) throw error
+    }
 
     return NextResponse.json({ success: true })
   } catch (err: any) {
