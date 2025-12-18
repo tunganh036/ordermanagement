@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, ArrowUpDown } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"  // Add this if not already
+import { Checkbox } from "@/components/ui/checkbox"  // Add this if not already
+import { Search, ArrowUpDown, Download, Upload } from "lucide-react"
 import { formatVND } from "@/lib/formatVND"
+import Papa from 'papaparse'  // Add papaparse via bun add papaparse (for CSV)
 
 type Order = {
   id: number
@@ -22,17 +25,6 @@ type Order = {
   status: string
 }
 
-type OrderDetail = {
-  order_number: string
-  order_date: string
-  customer_name: string
-  customer_phone: string
-  product_name: string
-  quantity: number
-  total: number
-  status: string
-}
-
 export default function ReportsPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([])
@@ -44,10 +36,13 @@ export default function ReportsPage() {
   // State cho filter và sort
   const [productSearch, setProductSearch] = useState("")
   const [phoneProductSearch, setPhoneProductSearch] = useState("")
-  const [detailSearch, setDetailSearch] = useState("")
   const [productSort, setProductSort] = useState<{ field: 'name' | 'qty' | 'total'; desc: boolean }>({ field: 'total', desc: true })
   const [phoneProductSort, setPhoneProductSort] = useState<{ field: 'phone' | 'name' | 'qty' | 'total'; desc: boolean }>({ field: 'total', desc: true })
-  const [orderDetailSort, setOrderDetailSort] = useState<{ field: 'customer_phone' | 'order_number' | 'order_date'; desc: boolean }>({ field: 'order_number', desc: true })
+
+  // State cho tab Cập Nhật Trạng Thái
+  const [selectedOrders, setSelectedOrders] = useState<number[]>([])
+  const [batchStatus, setBatchStatus] = useState<string>("")
+  const [statusUpdates, setStatusUpdates] = useState<{ [id: number]: string }>({})
 
   // Simple password check (thay 'anhnt123' bằng pass thật)
   useEffect(() => {
@@ -73,7 +68,7 @@ export default function ReportsPage() {
       const res = await fetch('/api/orders')
       const data = await res.json()
       setOrders(data)
-      setFilteredOrders(data.sort((a, b) => b.order_number.localeCompare(a.order_number))) // Mặc định sort descending mã đơn
+      setFilteredOrders(data)
       setLoading(false)
     } catch (err) {
       console.error(err)
@@ -81,11 +76,10 @@ export default function ReportsPage() {
     }
   }
 
-  // Filter cho tab Tổng Hợp Đơn Hàng (chi tiết đơn hàng)
   useEffect(() => {
     if (!authenticated) return
     const lower = searchTerm.toLowerCase()
-    let filtered = orders.filter(o => {
+    const filtered = orders.filter(o => {
       const orderNumber = (o.order_number || "").toLowerCase()
       const customerPhone = (o.customer_phone || "").toLowerCase()
       const customerEmail = (o.customer_email || "").toLowerCase()
@@ -99,8 +93,6 @@ export default function ReportsPage() {
         customerName.includes(lower)
       )
     })
-    // Sort mặc định descending mã đơn
-    filtered = filtered.sort((a, b) => b.order_number.localeCompare(a.order_number))
     setFilteredOrders(filtered)
   }, [searchTerm, orders, authenticated])
 
@@ -146,7 +138,7 @@ export default function ReportsPage() {
     return result
   }
 
-  // Tổng hợp theo SĐT & Sản Phẩm
+  // Tổng hợp theo sản phẩm + SĐT
   const aggregateByProductAndPhone = () => {
     const map = new Map<string, { phone: string; customerName: string; name: string; qty: number; total: number }>()
     orders.forEach(o => {
@@ -198,50 +190,71 @@ export default function ReportsPage() {
     return result
   }
 
-  // Report mới: Chi tiết join header + line
-  const getOrderDetails = () => {
-    let details: OrderDetail[] = []
-    orders.forEach(o => {
-      (o.order_items || []).forEach(i => {
-        details.push({
-          order_number: o.order_number,
-          order_date: o.order_date,
-          customer_name: o.customer_name,
-          customer_phone: o.customer_phone,
-          product_name: i.product_name,
-          quantity: i.quantity,
-          total: i.total,
-          status: o.status
-        })
+  // Hàm update status cho 1 hoặc nhiều order
+  const updateOrderStatus = async (orderIds: number[], newStatus: string) => {
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderIds, status: newStatus })
       })
-    })
-
-    // Filter theo SĐT, số đơn hàng
-    if (detailSearch) {
-      const lower = detailSearch.toLowerCase()
-      details = details.filter(d =>
-        (d.order_number || "").toLowerCase().includes(lower) ||
-        (d.customer_phone || "").toLowerCase().includes(lower)
-      )
+      if (!res.ok) throw new Error('Update failed')
+      // Refresh data sau update
+      fetchOrders()
+      setSelectedOrders([])
+      setStatusUpdates({})
+      setBatchStatus("")
+      alert('Cập nhật thành công!')
+    } catch (err) {
+      console.error(err)
+      alert('Cập nhật thất bại!')
     }
+  }
 
-    // Sort theo state
-    details.sort((a, b) => {
-      if (orderDetailSort.field === 'customer_phone') {
-        const compare = a.customer_phone.localeCompare(b.customer_phone)
-        return orderDetailSort.desc ? -compare : compare
+  // Download CSV
+  const downloadCSV = () => {
+    const csvData = orders.map(o => ({
+      id: o.id,
+      order_number: o.order_number,
+      status: o.status
+    }))
+    const csv = Papa.unparse(csvData)
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'orders_status.csv'
+    a.click()
+  }
+
+  // Upload CSV
+  const handleUploadCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        const updates = results.data.map((row: any) => ({
+          id: parseInt(row.id),
+          status: row.status
+        }))
+        // Call API to batch update from CSV
+        try {
+          const res = await fetch('/api/orders', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ batchUpdates: updates })
+          })
+          if (!res.ok) throw new Error('Batch update failed')
+          fetchOrders()
+          alert('Upload và update thành công!')
+        } catch (err) {
+          console.error(err)
+          alert('Upload thất bại!')
+        }
       }
-      if (orderDetailSort.field === 'order_number') {
-        const compare = a.order_number.localeCompare(b.order_number)
-        return orderDetailSort.desc ? -compare : compare
-      }
-      // Ngày đặt hàng: chuyển sang Date để sort
-      const dateA = new Date(a.order_date).getTime()
-      const dateB = new Date(b.order_date).getTime()
-      return orderDetailSort.desc ? dateB - dateA : dateA - dateB
     })
-
-    return details
   }
 
   if (!authenticated) {
@@ -266,11 +279,11 @@ export default function ReportsPage() {
     <div className="min-h-screen bg-background p-6">
       <h1 className="text-3xl font-bold mb-6">Báo Cáo Đơn Hàng (Admin)</h1>
       <Tabs defaultValue="detail">
-        <TabsList className="grid w-full grid-cols-4">  {/* Thêm 1 tab mới */}
-          <TabsTrigger value="detail">Tổng Hợp Đơn Hàng</TabsTrigger>  {/* Đổi tên */}
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="detail">Tổng Hợp Đơn Hàng</TabsTrigger>
           <TabsTrigger value="by-product">Tổng Hợp Theo Sản Phẩm</TabsTrigger>
           <TabsTrigger value="by-phone-product">Theo SĐT & Sản Phẩm</TabsTrigger>
-          <TabsTrigger value="order-details">Chi Tiết Đơn Hàng Join</TabsTrigger>  {/* Report mới */}
+          <TabsTrigger value="update-status">Cập Nhật Trạng Thái</TabsTrigger>  {/* Tab mới */}
         </TabsList>
         <TabsContent value="detail">
           <Card className="p-4">
