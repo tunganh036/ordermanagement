@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search } from "lucide-react"
+import { formatVND } from "@/lib/formatVND"
 
 type Order = {
   id: number
